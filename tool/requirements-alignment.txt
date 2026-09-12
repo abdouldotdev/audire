@@ -1,0 +1,9 @@
+# Optional workstation-only export. Not dependencies of the phone app.
+# Use Python 3.11 in a separate virtual environment.
+torch==2.6.0
+transformers==4.57.3
+huggingface-hub==0.36.0
+onnx==1.17.0
+onnxruntime==1.20.1
+numpy==2.2.6
+soundfile==0.13.1

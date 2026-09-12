@@ -1,0 +1,28 @@
+Lisière — local checks, 2026-09-11
+Scope: Python tooling, Swift syntax only; NOT a Flutter/mobile build.
+
+$ python3 tool/test_tooling.py
+test_android_patch_idempotence (__main__.ToolingTests.test_android_patch_idempotence) ... ok
+test_demo_regeneration (__main__.ToolingTests.test_demo_regeneration) ... ok
+test_demo_structure_and_spine (__main__.ToolingTests.test_demo_structure_and_spine) ... ok
+test_edit_distance (__main__.ToolingTests.test_edit_distance) ... ok
+test_ios_patch_idempotence_and_static_linking (__main__.ToolingTests.test_ios_patch_idempotence_and_static_linking) ... ok
+test_relative_dart_imports_exist (__main__.ToolingTests.test_relative_dart_imports_exist) ... ok
+test_streamed_hash (__main__.ToolingTests.test_streamed_hash) ... ok
+
+----------------------------------------------------------------------
+Ran 7 tests in 0.013s
+
+OK
+
+$ python3 -m py_compile tool/*.py
+PASS: Python syntax compilation.
+
+$ swiftc -frontend -parse packages/lisiere_native_tts/ios/Classes/LisiereNativeTtsPlugin.swift
+PASS: Swift syntax parsing only. No iOS SDK type checking.
+
+Flutter SDK: not installed
+Dart SDK: not installed
+
+Lexical delimiter scan: 28 Dart files, 0 findings.
+NOT Dart parsing, type analysis, or Flutter compilation.

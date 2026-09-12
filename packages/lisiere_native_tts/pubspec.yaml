@@ -1,0 +1,17 @@
+name: lisiere_native_tts
+description: Local French system voices with utterance-aware UTF-16 boundaries.
+version: 0.1.0
+publish_to: none
+environment:
+  sdk: '>=3.9.0 <4.0.0'
+dependencies:
+  flutter:
+    sdk: flutter
+flutter:
+  plugin:
+    platforms:
+      android:
+        package: app.lisiere.native_tts
+        pluginClass: LisiereNativeTtsPlugin
+      ios:
+        pluginClass: LisiereNativeTtsPlugin

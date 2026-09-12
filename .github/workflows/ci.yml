@@ -1,0 +1,42 @@
+name: Source validation
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'lib/**'
+      - 'test/**'
+      - 'packages/**'
+      - 'tool/**'
+      - 'pubspec.yaml'
+      - '.github/workflows/ci.yml'
+  pull_request:
+jobs:
+  flutter-android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - run: python3 tool/test_tooling.py
+      - run: python3 tool/bootstrap.py
+      - run: flutter pub get
+      - run: dart format lib test packages/lisiere_native_tts/lib
+      - run: flutter analyze --no-fatal-infos
+      - run: flutter test
+      - run: flutter build apk --debug
+      - uses: actions/upload-artifact@v4
+        with:
+          name: lisiere-debug-apk
+          path: build/app/outputs/flutter-apk/app-debug.apk
+# This workflow is supplied, not executed in the source-delivery environment.
+# Pin a Flutter release and commit pubspec.lock after the first validated build.
+# iOS builds and real-device/audio/model tests are separate acceptance gates.
