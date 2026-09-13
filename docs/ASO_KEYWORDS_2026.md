@@ -9,6 +9,22 @@
 
 Ce classement est une recommandation éditoriale et concurrentielle : le connecteur de données ASO donnant popularité/difficulté par mot-clé n’est pas disponible dans cet environnement. Les champs ci-dessous évitent les doublons titre/sous-titre et tiennent sous la limite App Store de 100 caractères.
 
+## Priorités observées
+
+| Priorité | Storefronts | Intention qui convertit | Concurrence observée | Angle Audire |
+|---|---|---|---|---|
+| 1 | France / Belgique / Suisse romande | `lecture vocale EPUB`, `lire un PDF à voix haute` | Moyenne, nouveaux concurrents spécialisés | Lecteur de livres personnel, pas une simple app TTS |
+| 2 | États-Unis | `read EPUB aloud`, `PDF to audiobook` | Forte, mais forte intention et paiement déjà établi | Vos propres livres, lecture + écoute locale |
+| 3 | Royaume-Uni / Canada anglophone / Australie | `read aloud PDF`, `text to speech reader` | Forte mais moins polarisée qu’aux US | Lecture longue, hors ligne, reprise précise |
+| 4 | Canada francophone | `lecture vocale`, `livre audio`, `hors ligne` | Moyenne ; extension naturelle de la fiche FR | Même promesse que France, vocabulaire canadien |
+| 5 | Allemagne | `Bücher vorlesen`, `EPUB vorlesen` | Forte et concurrent très proche | Attendre UI allemande ; éviter le générique `Text zu Sprache` |
+
+### Ce que nous ne ciblons pas
+
+- `livres audio` seul : intention souvent liée à un catalogue/streaming, alors qu’Audire lit les fichiers de l’utilisateur.
+- `text to speech` / `Text zu Sprache` seul : volume probablement élevé mais concurrence très large (documents, scan, web, IA) et conversion moins qualifiée.
+- Marques concurrentes : non retenues ; elles dégradent la promesse premium et peuvent créer un risque éditorial sans données de rang vérifiables.
+
 ## France — publié dans App Store Connect
 
 **Titre** : `Audire : EPUB & PDF audio`  
