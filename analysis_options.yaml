@@ -6,4 +6,3 @@ linter:
   rules:
     avoid_print: true
     use_build_context_synchronously: true
-    use_null_aware_elements: false

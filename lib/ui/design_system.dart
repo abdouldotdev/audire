@@ -20,18 +20,26 @@ class PaperColors {
   final bool dark;
   static PaperColors of(BuildContext context) =>
       PaperColors(Theme.of(context).brightness == Brightness.dark);
-  Color get paper => dark ? const Color(0xFF151D19) : const Color(0xFFF7F5EF);
-  Color get surface => dark ? const Color(0xFF202C25) : const Color(0xFFFFFEFA);
-  Color get inset => dark ? const Color(0xFF2B382F) : const Color(0xFFEDEFE8);
+  Color get paper => dark ? const Color(0xFF151E19) : const Color(0xFFF7F5EF);
+  Color get surface => dark ? const Color(0xFF202D25) : const Color(0xFFFFFEFA);
+  Color get inset => dark ? const Color(0xFF29392E) : const Color(0xFFEDEFE8);
   Color get ink => dark ? const Color(0xFFEEEFE7) : const Color(0xFF203B30);
-  Color get muted => dark ? const Color(0xFFB1BFB2) : const Color(0xFF5D6C61);
-  Color get line => dark ? const Color(0xFF3C4A40) : const Color(0xFFDCE1D7);
+  Color get muted => dark ? const Color(0xFFADB2AE) : const Color(0xFF5D6C61);
+  Color get line => dark ? const Color(0xFF3A403C) : const Color(0xFFDCE1D7);
   Color get accent => dark ? const Color(0xFFB3D7B8) : const Color(0xFF28553F);
   Color get onAccent =>
       dark ? const Color(0xFF162E20) : const Color(0xFFF8FAF3);
   Color get highlight =>
       dark ? const Color(0xFFB5DDA5) : const Color(0xFFD5EABF);
   Color get highlightInk => const Color(0xFF173620);
+  Color get readingHighlight =>
+      dark ? const Color(0xFFF4F1E8) : const Color(0xFF28553F);
+  Color get onReadingHighlight =>
+      dark ? const Color(0xFF17271F) : const Color(0xFFFFFFFF);
+  Color get selection =>
+      dark ? const Color(0x997A5A32) : const Color(0x663E7659);
+  Color get selectionHandle =>
+      dark ? const Color(0xFFF2C879) : const Color(0xFF28553F);
   Color get warning => dark ? const Color(0xFFF0BE9F) : const Color(0xFF8B432D);
   Color get warningSurface =>
       dark ? const Color(0xFF3F2B22) : const Color(0xFFF8EADF);
@@ -78,6 +86,11 @@ abstract final class LisiereTheme {
       progressIndicatorTheme: ProgressIndicatorThemeData(
         color: p.accent,
         linearTrackColor: p.inset,
+      ),
+      textSelectionTheme: TextSelectionThemeData(
+        selectionColor: p.selection,
+        selectionHandleColor: p.selectionHandle,
+        cursorColor: p.selectionHandle,
       ),
       iconTheme: IconThemeData(color: p.ink),
       navigationBarTheme: NavigationBarThemeData(
@@ -129,9 +142,10 @@ class PageIntro extends StatelessWidget {
     super.key,
     required this.kicker,
     required this.title,
-    required this.subtitle,
+    this.subtitle,
   });
-  final String kicker, title, subtitle;
+  final String kicker, title;
+  final String? subtitle;
   @override
   Widget build(BuildContext context) {
     final p = PaperColors.of(context);
@@ -149,11 +163,13 @@ class PageIntro extends StatelessWidget {
         ),
         const SizedBox(height: 14),
         Text(title, style: LisiereTheme.editorial(context, size: 36)),
-        const SizedBox(height: 14),
-        Text(
-          subtitle,
-          style: TextStyle(fontSize: 15, height: 1.5, color: p.muted),
-        ),
+        if (subtitle != null) ...[
+          const SizedBox(height: 14),
+          Text(
+            subtitle!,
+            style: TextStyle(fontSize: 15, height: 1.5, color: p.muted),
+          ),
+        ],
       ],
     );
   }
@@ -164,23 +180,21 @@ class SectionLabel extends StatelessWidget {
   final String text;
   final Widget? trailing;
   @override
-  Widget build(BuildContext context) {
-    final trailingWidget = trailing;
-    return Padding(
-      padding: const EdgeInsets.only(top: 28, bottom: 14),
-      child: Row(
-        children: [
-          Expanded(
-            child: Text(
-              text,
-              style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 18),
-            ),
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.only(top: 28, bottom: 14),
+    child: Row(
+      children: [
+        Expanded(
+          child: Text(
+            text,
+            style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 18),
           ),
-          if (trailingWidget != null) trailingWidget,
-        ],
-      ),
-    );
-  }
+        ),
+        // ignore: use_null_aware_elements
+        if (trailing != null) trailing!,
+      ],
+    ),
+  );
 }
 
 class PrimaryAction extends StatelessWidget {
@@ -188,24 +202,71 @@ class PrimaryAction extends StatelessWidget {
     super.key,
     required this.label,
     required this.onPressed,
+    this.subtitle,
   });
   final String label;
+  final String? subtitle;
   final VoidCallback? onPressed;
   @override
   Widget build(BuildContext context) {
     final p = PaperColors.of(context);
+    final detail = subtitle;
     return SizedBox(
       width: double.infinity,
-      child: AdaptiveButton(
-        onPressed: onPressed,
-        label: label,
-        enabled: onPressed != null,
-        color: p.accent,
-        textColor: p.onAccent,
-        minSize: const Size(48, 52),
-        borderRadius: BorderRadius.circular(16),
-        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
-      ),
+      child:
+          detail == null
+              ? AdaptiveButton(
+                onPressed: onPressed,
+                label: label,
+                enabled: onPressed != null,
+                color: p.accent,
+                textColor: p.onAccent,
+                minSize: const Size(48, 52),
+                borderRadius: BorderRadius.circular(16),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 18,
+                  vertical: 14,
+                ),
+              )
+              : Semantics(
+                button: true,
+                enabled: onPressed != null,
+                label: '$label, $detail',
+                child: AdaptiveButton.child(
+                  useNative: false,
+                  onPressed: onPressed,
+                  enabled: onPressed != null,
+                  color: p.accent,
+                  minSize: const Size(48, 64),
+                  borderRadius: BorderRadius.circular(16),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 18,
+                    vertical: 12,
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        label,
+                        style: TextStyle(
+                          color: p.onAccent,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      const SizedBox(height: 3),
+                      Text(
+                        detail,
+                        style: TextStyle(
+                          color: p.onAccent.withValues(alpha: .72),
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
     );
   }
 }
@@ -385,11 +446,13 @@ class ChoiceTile extends StatelessWidget {
     required this.selected,
     required this.onPressed,
     this.leading,
+    this.trailing,
   });
   final String title, subtitle;
   final bool selected;
   final VoidCallback? onPressed;
   final Widget? leading;
+  final Widget? trailing;
   @override
   Widget build(BuildContext context) {
     final p = PaperColors.of(context);
@@ -437,6 +500,7 @@ class ChoiceTile extends StatelessWidget {
                 size: 21,
                 color: selected ? p.accent : p.muted,
               ),
+              if (trailing != null) ...[const SizedBox(width: 8), trailing!],
             ],
           ),
         ),

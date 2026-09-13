@@ -2,9 +2,12 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:isolate';
+import 'dart:typed_data';
 import 'package:flutter/services.dart';
 import '../domain/narration.dart';
 import 'acoustic_aligner.dart';
+import 'estimated_word_cues.dart';
+import 'kokoro_runtime.dart';
 import 'supertonic_runtime.dart';
 
 class NeuralWorker {
@@ -81,6 +84,7 @@ Future<void> _run(List<dynamic> args) async {
   final input = ReceivePort();
   parent.send(input.sendPort);
   SupertonicRuntime? tts;
+  KokoroRuntime? kokoro;
   AcousticAligner? aligner;
   String? alignerRevision;
   await for (final dynamic packet in input) {
@@ -93,6 +97,8 @@ Future<void> _run(List<dynamic> args) async {
         alignerRevision = null;
         await tts?.close();
         tts = null;
+        await kokoro?.close();
+        kokoro = null;
         parent.send({'id': id});
         if (j['op'] == 'close') {
           input.close();
@@ -100,17 +106,33 @@ Future<void> _run(List<dynamic> args) async {
         }
         continue;
       }
-      final root = j['modelPath'] as String;
-      tts ??= await SupertonicRuntime.load(root);
       final narration = NarrationText.fromJson(
         Map<String, dynamic>.from(j['narration'] as Map),
       );
-      final audio = await tts.generate(
-        narration.spoken,
-        voice: j['voice'] as String,
-        steps: j['steps'] as int,
-      );
+      final root = j['modelPath'] as String;
+      final isKokoro = j['engine'] == 'kokoro';
+      late final Float32List generated;
+      late final int sampleRate;
+      if (isKokoro) {
+        kokoro ??= await KokoroRuntime.load(root);
+        generated = await kokoro.generate(
+          narration.spoken,
+          voice: j['voice'] as String,
+        );
+        sampleRate = KokoroRuntime.sampleRate;
+      } else {
+        tts ??= await SupertonicRuntime.load(root);
+        generated = await tts.generate(
+          narration.spoken,
+          voice: j['voice'] as String,
+          steps: j['steps'] as int,
+          language: j['language'] as String? ?? 'fr',
+        );
+        sampleRate = tts.sampleRate;
+      }
+      final audio = trimSpeechEdges(generated, sampleRate);
       var cues = <Map<String, int>>[];
+      var cueQuality = 'estimated';
       String? warning;
       if (j['alignmentPath'] != null) {
         try {
@@ -122,23 +144,46 @@ Future<void> _run(List<dynamic> args) async {
           cues =
               (await aligner!.align(
                 audio,
-                tts.sampleRate,
-                narration,
+                sampleRate,
+                NarrationText(
+                  narration.spoken,
+                  List.generate(narration.spoken.length, (i) => i),
+                  List.generate(narration.spoken.length, (i) => i + 1),
+                ),
               )).map((c) => c.toJson()).toList();
-          if (cues.isEmpty) {
+          final expectedWords =
+              RegExp(
+                r"[\p{L}\p{N}]+(?:[’'\-][\p{L}\p{N}]+)*",
+                unicode: true,
+              ).allMatches(narration.spoken).length;
+          // Never advertise acoustic word tracking for a partial path. Missing
+          // one word shifts every visual highlight that follows it.
+          if (cues.length != expectedWords) {
+            cues = <Map<String, int>>[];
             warning =
                 'Alignement incertain : suivi par phrase pour ce passage.';
           }
+          if (cues.isNotEmpty) cueQuality = 'acoustic';
         } catch (e) {
           warning = 'Alignement indisponible : suivi par phrase. $e';
         }
       }
+      if (cues.isEmpty) {
+        cues =
+            estimateWordCues(
+              audio,
+              sampleRate,
+              narration.spoken,
+            ).map((cue) => cue.toJson()).toList();
+        warning = null;
+      }
       final path = j['wavePath'] as String;
-      await writeWave(path, audio, tts.sampleRate);
+      await writeWave(path, audio, sampleRate);
       final result = {
         'path': path,
         'cues': cues,
-        'durationMs': (audio.length / tts.sampleRate * 1000).round(),
+        'cueQuality': cueQuality,
+        'durationMs': (audio.length / sampleRate * 1000).round(),
         'warning': warning,
       };
       final metadata = File('$path.json.part');

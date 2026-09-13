@@ -13,10 +13,15 @@ class LibraryPage extends StatefulWidget {
   State<LibraryPage> createState() => _LibraryPageState();
 }
 
-class _LibraryPageState extends State<LibraryPage> {
+class _LibraryPageState extends State<LibraryPage>
+    with AutomaticKeepAliveClientMixin<LibraryPage> {
   bool _importing = false;
   String _search = '';
   String? _error;
+
+  @override
+  bool get wantKeepAlive => true;
+
   Future<void> _import() async {
     if (_importing) return;
     setState(() {
@@ -26,7 +31,7 @@ class _LibraryPageState extends State<LibraryPage> {
     try {
       final picked = await FilePicker.platform.pickFiles(
         type: FileType.custom,
-        allowedExtensions: ['epub'],
+        allowedExtensions: ['epub', 'pdf'],
         allowMultiple: false,
         withData: false,
       );
@@ -66,7 +71,7 @@ class _LibraryPageState extends State<LibraryPage> {
       context: context,
       title: 'Retirer ce livre ?',
       message:
-          '« ${book.title} » et sa position seront retirés de Lisière. Votre fichier EPUB original ne sera pas modifié.',
+          '« ${book.title} » et sa position seront retirés d’Audire. Votre document original ne sera pas modifié.',
       actions: [
         AlertAction(
           title: 'Annuler',
@@ -85,6 +90,7 @@ class _LibraryPageState extends State<LibraryPage> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     final reader = widget.reader, p = PaperColors.of(context);
     final books =
         reader.library.books
@@ -94,157 +100,136 @@ class _LibraryPageState extends State<LibraryPage> {
               ),
             )
             .toList();
-    return ListView(
-      padding: const EdgeInsets.fromLTRB(24, 26, 24, 32),
-      children: [
-        const PageIntro(
-          kicker: 'La bibliothèque',
-          title: 'Vos livres,\nà votre rythme.',
-          subtitle: 'Le plaisir de lire. La liberté d’écouter.',
-        ),
-        const SizedBox(height: 24),
-        PrimaryAction(
-          label: _importing ? 'Import du livre…' : 'Importer un EPUB',
-          onPressed: _importing ? null : _import,
-        ),
-        const SizedBox(height: 14),
-        const Align(
-          alignment: Alignment.centerLeft,
-          child: StatusPill(
-            'Livres conservés sur cet appareil',
-            icon: Icons.phone_iphone_outlined,
+    return SafeArea(
+      top: true,
+      bottom: false,
+      child: ListView(
+        key: const PageStorageKey<String>('library-tab-scroll'),
+        padding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
+        children: [
+          const PageIntro(kicker: 'Bibliothèque', title: 'Vos livres'),
+          const SizedBox(height: 20),
+          PrimaryAction(
+            label: _importing ? 'Import du document…' : 'Importer un document',
+            subtitle: 'EPUB ou PDF',
+            onPressed: _importing ? null : _import,
           ),
-        ),
-        const SizedBox(height: 24),
-        if (_error != null)
-          Notice(
-            _error!,
-            onClose:
-                () => setState(() {
-                  _error = null;
-                }),
-          ),
-        if (reader.library.recoveryWarning != null)
-          Notice(reader.library.recoveryWarning!),
-        if (reader.library.books.length > 3)
-          AdaptiveTextField(
-            placeholder: 'Un titre, un auteur…',
-            prefixIcon: const Icon(Icons.search, size: 20),
-            onChanged:
-                (v) => setState(() {
-                  _search = v;
-                }),
-          ),
-        SectionLabel(
-          'À portée de voix',
-          trailing: Text(
-            '${books.length} livre${books.length > 1 ? 's' : ''}',
-            style: TextStyle(fontSize: 12, color: p.muted),
-          ),
-        ),
-        if (books.isEmpty)
-          SurfacePanel(
-            child: Column(
-              children: [
-                Icon(Icons.auto_stories_outlined, size: 42, color: p.muted),
-                const SizedBox(height: 16),
-                Text(
-                  _search.isNotEmpty
-                      ? 'Aucun livre ne correspond.'
-                      : 'Votre prochaine lecture commence ici.',
-                  textAlign: TextAlign.center,
-                  style: LisiereTheme.editorial(context, size: 24),
-                ),
-                const SizedBox(height: 10),
-                Text(
-                  'Ajoutez un EPUB sans DRM. Les chapitres seront préparés pour la lecture.',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 14, height: 1.5, color: p.muted),
-                ),
-              ],
+          const SizedBox(height: 20),
+          if (_error != null)
+            Notice(
+              _error!,
+              onClose:
+                  () => setState(() {
+                    _error = null;
+                  }),
+            ),
+          if (reader.library.recoveryWarning != null)
+            Notice(reader.library.recoveryWarning!),
+          if (reader.library.books.length > 3)
+            AdaptiveTextField(
+              placeholder: 'Un titre, un auteur…',
+              prefixIcon: const Icon(Icons.search, size: 20),
+              onChanged:
+                  (v) => setState(() {
+                    _search = v;
+                  }),
+            ),
+          SectionLabel(
+            'Livres',
+            trailing: Text(
+              '${books.length}',
+              style: TextStyle(fontSize: 12, color: p.muted),
             ),
           ),
-        for (final book in books)
-          Padding(
-            padding: const EdgeInsets.only(bottom: 14),
-            child: SurfacePanel(
-              padding: const EdgeInsets.all(16),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
+          if (books.isEmpty)
+            SurfacePanel(
+              child: Column(
                 children: [
-                  GestureDetector(
-                    onTap: () => _open(book),
-                    child: BookCover(book: book, width: 78, height: 112),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        GestureDetector(
-                          onTap: () => _open(book),
-                          child: Semantics(
-                            button: true,
-                            child: Text(
-                              book.title,
-                              style: LisiereTheme.editorial(context, size: 23),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 7),
-                        Text(
-                          book.author,
-                          style: TextStyle(fontSize: 13, color: p.muted),
-                        ),
-                        const SizedBox(height: 11),
-                        Text(
-                          '${book.chapters.length} chapitres · ${book.language.toUpperCase()}',
-                          style: TextStyle(fontSize: 11, color: p.muted),
-                        ),
-                        const SizedBox(height: 12),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: AdaptiveButton(
-                                label:
-                                    reader.library.positions.containsKey(
-                                          book.id,
-                                        )
-                                        ? 'Reprendre'
-                                        : 'Ouvrir',
-                                color: p.inset,
-                                textColor: p.ink,
-                                onPressed: () => _open(book),
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            IconAction(
-                              label: 'Retirer ${book.title}',
-                              icon: Icons.more_horiz,
-                              onPressed: () => _delete(book),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
+                  Icon(Icons.auto_stories_outlined, size: 42, color: p.muted),
+                  const SizedBox(height: 16),
+                  Text(
+                    _search.isNotEmpty
+                        ? 'Aucun livre ne correspond.'
+                        : 'Aucun livre importé.',
+                    textAlign: TextAlign.center,
+                    style: LisiereTheme.editorial(context, size: 24),
                   ),
                 ],
               ),
             ),
-          ),
-        const SizedBox(height: 20),
-        Text(
-          'Un espace calme.\nPas de compte, pas de fil d’actualité.',
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            fontFamily: LisiereTheme.serif,
-            fontStyle: FontStyle.italic,
-            height: 1.6,
-            fontSize: 16,
-            color: p.muted,
-          ),
-        ),
-      ],
+          for (final book in books)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 14),
+              child: SurfacePanel(
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    GestureDetector(
+                      onTap: () => _open(book),
+                      child: BookCover(book: book, width: 78, height: 112),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          GestureDetector(
+                            onTap: () => _open(book),
+                            child: Semantics(
+                              button: true,
+                              child: Text(
+                                book.title,
+                                style: LisiereTheme.editorial(
+                                  context,
+                                  size: 23,
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 7),
+                          Text(
+                            book.author,
+                            style: TextStyle(fontSize: 13, color: p.muted),
+                          ),
+                          const SizedBox(height: 11),
+                          Text(
+                            '${book.chapters.length} ${book.format == DocumentFormat.pdf ? 'pages' : 'chapitres'} · ${book.language.toUpperCase()}',
+                            style: TextStyle(fontSize: 11, color: p.muted),
+                          ),
+                          const SizedBox(height: 12),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: AdaptiveButton(
+                                  label:
+                                      reader.library.positions.containsKey(
+                                            book.id,
+                                          )
+                                          ? 'Reprendre'
+                                          : 'Ouvrir',
+                                  color: p.inset,
+                                  textColor: p.ink,
+                                  onPressed: () => _open(book),
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              IconAction(
+                                label: 'Retirer ${book.title}',
+                                icon: Icons.more_horiz,
+                                onPressed: () => _delete(book),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+        ],
+      ),
     );
   }
 }

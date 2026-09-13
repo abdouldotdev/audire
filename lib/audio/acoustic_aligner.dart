@@ -125,7 +125,7 @@ class AcousticAligner {
         tokens: tokens,
         blank: blank,
       );
-      if (path == null || path.confidence < 0.08) return [];
+      if (path == null || path.confidence < 0.10) return [];
       // A forced path exists even for wrong audio. Reject severe transcript mismatch.
       final greedy = <int>[];
       var previous = -1;
@@ -137,7 +137,7 @@ class AcousticAligner {
         if (best != blank && best != previous) greedy.add(best);
         previous = best;
       }
-      if (_editDistance(greedy, tokens) / math.max(1, tokens.length) > 0.45) {
+      if (_editDistance(greedy, tokens) / math.max(1, tokens.length) > 0.38) {
         return [];
       }
       final strideMs = (config['strideSamples'] as num).toDouble() / 16.0;
@@ -155,16 +155,14 @@ class AcousticAligner {
                 .round()
                 .clamp(start, durationMs)
                 .toInt();
-        if (end > start) {
-          cues.add(
-            WordCue(
-              startMs: start,
-              endMs: end,
-              start: range.start,
-              end: range.end,
-            ),
-          );
-        }
+        cues.add(
+          WordCue(
+            startMs: start,
+            endMs: math.max(start + 1, end).clamp(0, durationMs),
+            start: range.start,
+            end: range.end,
+          ),
+        );
       }
       return cues;
     } finally {

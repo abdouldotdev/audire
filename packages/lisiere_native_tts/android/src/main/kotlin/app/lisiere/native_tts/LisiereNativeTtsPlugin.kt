@@ -1,11 +1,18 @@
 package app.lisiere.native_tts
 
+import android.content.Context
+import android.net.Uri
 import android.media.AudioAttributes
+import android.os.BatteryManager
 import android.os.Handler
 import android.os.Looper
+import android.os.PowerManager
 import android.speech.tts.TextToSpeech
 import android.speech.tts.UtteranceProgressListener
 import android.speech.tts.Voice
+import com.google.mlkit.vision.common.InputImage
+import com.google.mlkit.vision.text.TextRecognition
+import com.google.mlkit.vision.text.latin.TextRecognizerOptions
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.plugin.common.EventChannel
 import io.flutter.plugin.common.MethodCall
@@ -22,9 +29,11 @@ class LisiereNativeTtsPlugin : FlutterPlugin, MethodChannel.MethodCallHandler,
     private lateinit var events: EventChannel
     private val waiting = mutableListOf<Pair<MethodCall, MethodChannel.Result>>()
     private var attached = false
+    private lateinit var context: Context
 
     override fun onAttachedToEngine(binding: FlutterPlugin.FlutterPluginBinding) {
         attached = true
+        context = binding.applicationContext
         methods = MethodChannel(binding.binaryMessenger, "lisiere/native_tts")
         events = EventChannel(binding.binaryMessenger, "lisiere/native_tts/events")
         methods.setMethodCallHandler(this)
@@ -56,15 +65,50 @@ class LisiereNativeTtsPlugin : FlutterPlugin, MethodChannel.MethodCallHandler,
         }
     }
 
-    private fun localVoices(): List<Voice> = tts?.voices.orEmpty().filter {
-        it.locale.language == "fr" && !it.isNetworkConnectionRequired &&
+    private fun localVoices(language: String? = null): List<Voice> = tts?.voices.orEmpty().filter {
+        (it.locale.language == "fr" || it.locale.language == "en") &&
+            (language == null || it.locale.language == language) &&
+            !it.isNetworkConnectionRequired &&
             !it.features.orEmpty().contains(TextToSpeech.Engine.KEY_FEATURE_NOT_INSTALLED)
     }.sortedWith(compareByDescending<Voice> { it.quality }.thenBy { it.name })
 
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
         // stop must not queue behind a slow engine initialization.
         if (call.method == "stop") { tts?.stop(); result.success(null); return }
+        // Android TextToSpeech has no true pause/resume. Report false so Dart
+        // resumes after the last completed range instead of replaying a word.
+        if (call.method == "pause") { tts?.stop(); result.success(false); return }
+        if (call.method == "resume") { result.success(false); return }
         if (call.method == "excludeFromBackup") { result.success(null); return }
+        if (call.method == "recognizeText") {
+            val path = call.argument<String>("path")
+            if (path.isNullOrBlank()) {
+                result.error("INVALID_IMAGE", "Image OCR absente.", null); return
+            }
+            try {
+                val image = InputImage.fromFilePath(context, Uri.fromFile(java.io.File(path)))
+                val recognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
+                recognizer.process(image)
+                    .addOnSuccessListener { text -> result.success(text.text); recognizer.close() }
+                    .addOnFailureListener { error ->
+                        result.error("OCR_FAILED", error.localizedMessage, null); recognizer.close()
+                    }
+            } catch (error: Exception) {
+                result.error("OCR_FAILED", error.localizedMessage, null)
+            }
+            return
+        }
+        if (call.method == "powerStatus") {
+            val battery = context.getSystemService(Context.BATTERY_SERVICE) as BatteryManager
+            val power = context.getSystemService(Context.POWER_SERVICE) as PowerManager
+            val level = battery.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY)
+            result.success(mapOf(
+                "batteryLevel" to if (level in 0..100) level / 100.0 else 1.0,
+                "lowPower" to power.isPowerSaveMode,
+                "thermal" to if (android.os.Build.VERSION.SDK_INT >= 29) power.currentThermalStatus else 0
+            ))
+            return
+        }
         if (ready == null) { waiting.add(call to result); return }
         if (ready != true) {
             result.error("TTS_UNAVAILABLE", "Aucun moteur vocal système n’est disponible.", null)
@@ -75,19 +119,29 @@ class LisiereNativeTtsPlugin : FlutterPlugin, MethodChannel.MethodCallHandler,
                 mapOf("id" to it.name, "name" to it.name,
                     "language" to it.locale.toLanguageTag(), "quality" to it.quality)
             })
+            "translateEnFr" -> {
+                result.error("BERGAMOT_NOT_LINKED",
+                    "Le pipeline Flutter est prêt, mais le runtime Bergamot/Marian natif doit encore être lié à cette build Android.", null)
+            }
+            "translationStatus" -> result.success(mapOf(
+                "available" to false,
+                "message" to "La traduction anglais → français nécessite le runtime Bergamot/Marian, qui n’est pas inclus dans cette build. La lecture reste disponible avec une voix anglaise locale."
+            ))
             "speak" -> {
                 val id = call.argument<String>("id")
                 val text = call.argument<String>("text")
+                val language = call.argument<String>("language") ?: "fr"
                 val requested = call.argument<String>("voice")
                 if (id.isNullOrBlank() || text.isNullOrBlank() || text.length > TextToSpeech.getMaxSpeechInputLength()) {
                     result.error("INVALID_INPUT", "Le passage à lire est vide ou trop long.", null); return
                 }
-                val available = localVoices()
+                val available = localVoices(language)
                 val voice = if (requested == null) available.firstOrNull()
                     else available.firstOrNull { it.name == requested }
                 if (voice == null) {
-                    result.error("NO_LOCAL_FRENCH_VOICE",
-                        "Installez une voix française hors ligne dans les réglages de synthèse vocale Android, puis rechargez les voix.", null)
+                    val label = if (language == "en") "anglaise" else "française"
+                    result.error("NO_LOCAL_VOICE",
+                        "Installez une voix $label hors ligne dans les réglages de synthèse vocale Android, puis rechargez les voix.", null)
                     return
                 }
                 val speed = (call.argument<Number>("speed")?.toFloat() ?: 1f).coerceIn(.65f, 1.7f)
@@ -96,7 +150,9 @@ class LisiereNativeTtsPlugin : FlutterPlugin, MethodChannel.MethodCallHandler,
                     engine.setSpeechRate(speed) != TextToSpeech.SUCCESS) {
                     result.error("VOICE_REJECTED", "Cette voix locale ne peut pas être activée.", null); return
                 }
-                val status = engine.speak(text, TextToSpeech.QUEUE_FLUSH, null, id)
+                val mode = if (call.argument<Boolean>("enqueue") == true)
+                    TextToSpeech.QUEUE_ADD else TextToSpeech.QUEUE_FLUSH
+                val status = engine.speak(text, mode, null, id)
                 if (status == TextToSpeech.SUCCESS) result.success(null)
                 else result.error("SPEAK_FAILED", "La synthèse n’a pas pu démarrer.", null)
             }

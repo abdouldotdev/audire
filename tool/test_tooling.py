@@ -23,6 +23,7 @@ def load(name: str):
 bootstrap = load("bootstrap")
 exporter = load("export_alignment")
 make_demo = load("make_demo")
+package_translation_bundle = load("package_translation_bundle")
 
 class ToolingTests(unittest.TestCase):
     def test_demo_structure_and_spine(self):
@@ -102,6 +103,15 @@ class ToolingTests(unittest.TestCase):
             self.assertNotIn("NSMicrophoneUsageDescription", data)
             self.assertIn("use_frameworks! :linkage => :static", podfile.read_text())
             self.assertIn("IPHONEOS_DEPLOYMENT_TARGET = 16.0;", project.read_text())
+
+
+    def test_translation_bundle_packager(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            model = root / "model"; model.write_bytes(b"model")
+            vocab = root / "vocab"; vocab.write_bytes(b"vocab")
+            self.assertEqual(package_translation_bundle.digest(model), hashlib.sha256(b"model").hexdigest())
+            self.assertEqual(package_translation_bundle.digest(vocab), hashlib.sha256(b"vocab").hexdigest())
 
     def test_relative_dart_imports_exist(self):
         import re

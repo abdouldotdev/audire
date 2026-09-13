@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 import 'book.dart';
+import 'pronunciation_dictionary.dart';
 
 /// All offsets are UTF-16, like Dart String, Android TTS and iOS NSRange.
 class SourceRange {
@@ -49,7 +50,7 @@ class SpeechSegment {
 /// Expansions retain a many-to-one map to the original displayed characters.
 class FrenchNarration {
   static final _replacements = RegExp(
-    r'\b(?:Mme\.?|Mlle\.?|Dr\.|Pr\.|M\.)\s|\b\d{1,9}\b',
+    r'''\b(?:Mme\.?|Mlle\.?|Dr\.|Pr\.|M\.)\s|\b\d{1,2}/\d{1,2}/\d{2,4}\b|\b\d{1,2}[:h]\d{2}\b|\b\d{1,9}(?:[,.]\d{1,6})?\b|\b\d{1,9}(?:er|re|e|ème)\b|(?:[A-ZÀ-ÖØ-Þ]\.?){2,8}|[\p{L}][\p{L}\p{M}'’\-]*|[œŒæÆ&%€$£@+×÷=−]|[\u00ad\u200b-\u200f\u202a-\u202e\u2060-\u206f\ufeff]|[\u2300-\u27bf\u{1f000}-\u{1faff}]''',
     unicode: true,
   );
   static const _small = [
@@ -70,6 +71,51 @@ class FrenchNarration {
     'quatorze',
     'quinze',
     'seize',
+  ];
+
+  static const _letters = {
+    'A': 'a',
+    'B': 'bé',
+    'C': 'cé',
+    'D': 'dé',
+    'E': 'e',
+    'F': 'èf',
+    'G': 'gé',
+    'H': 'ache',
+    'I': 'i',
+    'J': 'ji',
+    'K': 'ka',
+    'L': 'elle',
+    'M': 'ème',
+    'N': 'èn',
+    'O': 'o',
+    'P': 'pé',
+    'Q': 'cul',
+    'R': 'erre',
+    'S': 'ès',
+    'T': 'té',
+    'U': 'u',
+    'V': 'vé',
+    'W': 'double vé',
+    'X': 'iks',
+    'Y': 'i grec',
+    'Z': 'zède',
+  };
+
+  static const _months = [
+    '',
+    'janvier',
+    'février',
+    'mars',
+    'avril',
+    'mai',
+    'juin',
+    'juillet',
+    'août',
+    'septembre',
+    'octobre',
+    'novembre',
+    'décembre',
   ];
 
   static String integer(int n) {
@@ -117,7 +163,10 @@ class FrenchNarration {
     return n % 1000000 == 0 ? root : '$root ${integer(n % 1000000)}';
   }
 
-  static NarrationText normalize(String source) {
+  static NarrationText normalize(
+    String source, {
+    PronunciationDictionary dictionary = PronunciationDictionary.french,
+  }) {
     final text = StringBuffer();
     final starts = <int>[], ends = <int>[];
     void append(String value, int start, int end, {bool identity = false}) {
@@ -139,16 +188,53 @@ class FrenchNarration {
       final token = m[0]!;
       final trimmed = token.trim();
       String replacement;
-      if (int.tryParse(trimmed) != null) {
-        // Decimal values, dates, identifiers and leading zeros are deliberately
-        // left to the voice engine; do not invent a semantic interpretation.
+      final date = RegExp(
+        r'^(\d{1,2})/(\d{1,2})/(\d{2,4})$',
+      ).firstMatch(trimmed);
+      final time = RegExp(r'^(\d{1,2})[:h](\d{2})$').firstMatch(trimmed);
+      final decimal = RegExp(r'^(\d+)[,.](\d+)$').firstMatch(trimmed);
+      final ordinal = RegExp(
+        r'^(\d+)(er|re|e|ème)$',
+        caseSensitive: false,
+      ).firstMatch(trimmed);
+      final dictionaryValue = dictionary.replacementFor(trimmed);
+      if (date != null) {
+        final day = int.parse(date[1]!);
+        final month = int.parse(date[2]!);
+        final year = int.parse(date[3]!);
+        replacement =
+            day >= 1 && day <= 31 && month >= 1 && month <= 12
+                ? '${day == 1 ? 'premier' : integer(day)} ${_months[month]} ${integer(year)}'
+                : _spellDigits(trimmed);
+      } else if (time != null) {
+        final hour = int.parse(time[1]!);
+        final minute = int.parse(time[2]!);
+        replacement =
+            hour <= 23 && minute <= 59
+                ? '${integer(hour)} heure${hour > 1 ? 's' : ''}${minute == 0 ? '' : ' ${integer(minute)}'}'
+                : _spellDigits(trimmed);
+      } else if (decimal != null) {
+        final parts = [decimal[1]!, decimal[2]!];
+        replacement =
+            '${integer(int.parse(parts[0]))} virgule ${parts[1].split('').map((d) => integer(int.parse(d))).join(' ')}';
+      } else if (ordinal != null) {
+        final value = int.parse(ordinal[1]!);
+        replacement = value == 1 ? 'premier' : '${integer(value)}ième';
+      } else if (int.tryParse(trimmed) != null) {
         final before = m.start > 0 ? source[m.start - 1] : '';
         final after = m.end < source.length ? source[m.end] : '';
         final number = int.parse(trimmed);
         final contextual =
-            RegExp(r'[\d.,/:]').hasMatch(before + after) ||
+            RegExp(
+              r'[\p{L}\d._/@#-]',
+              unicode: true,
+            ).hasMatch(before + after) ||
             (trimmed.length > 1 && trimmed.startsWith('0'));
-        replacement = contextual ? token : integer(number);
+        replacement = contextual ? _spellDigits(trimmed) : integer(number);
+      } else if (dictionaryValue != null) {
+        replacement = dictionaryValue;
+      } else if (_isInitialism(trimmed)) {
+        replacement = _spellInitialism(trimmed);
       } else {
         replacement = switch (trimmed.replaceAll('.', '')) {
           'Mme' => 'Madame ',
@@ -156,11 +242,166 @@ class FrenchNarration {
           'Dr' => 'Docteur ',
           'Pr' => 'Professeur ',
           'M' => 'Monsieur ',
+          'œ' => 'oe',
+          'Œ' => 'OE',
+          'æ' => 'ae',
+          'Æ' => 'AE',
+          '&' => ' et ',
+          '%' => ' pour cent ',
+          '€' => ' euros ',
+          r'$' => ' dollars ',
+          '£' => ' livres sterling ',
+          '@' => ' arobase ',
+          '+' => ' plus ',
+          '×' => ' fois ',
+          '÷' => ' divisé par ',
+          '=' => ' égale ',
+          '−' => ' moins ',
+          '\u00ad' || '\u200b' || '\ufeff' => '',
           _ => token,
         };
       }
       append(replacement, m.start, m.end);
       cursor = m.end;
+    }
+    append(source.substring(cursor), cursor, source.length, identity: true);
+    return NarrationText(text.toString(), starts, ends);
+  }
+
+  static bool _isInitialism(String token) {
+    final compact = token.replaceAll('.', '');
+    return compact.length >= 2 &&
+        compact.length <= 8 &&
+        RegExp(r'^[A-ZÀ-ÖØ-Þ]+$', unicode: true).hasMatch(compact);
+  }
+
+  static String _spellInitialism(String token) => token
+      .replaceAll('.', '')
+      .split('')
+      .map((letter) => _letters[letter] ?? letter.toLowerCase())
+      .join(' ');
+
+  static String _spellDigits(String value) => value
+      .split('')
+      .where((character) => RegExp(r'\d').hasMatch(character))
+      .map((digit) => integer(int.parse(digit)))
+      .join(' ');
+}
+
+/// English normalization is available to the playback layer when an English
+/// offline synthesizer is selected. System voices can keep handling their own
+/// locale-specific pronunciation.
+class EnglishNarration {
+  static final _tokens = RegExp(
+    r'''\b\d{1,9}(?:[.,]\d{1,6})?\b|(?:[A-Z]\.?){2,8}|[\p{L}][\p{L}\p{M}'’\-]*|[&%€$£@+=]''',
+    unicode: true,
+  );
+
+  static const _small = [
+    'zero',
+    'one',
+    'two',
+    'three',
+    'four',
+    'five',
+    'six',
+    'seven',
+    'eight',
+    'nine',
+    'ten',
+    'eleven',
+    'twelve',
+    'thirteen',
+    'fourteen',
+    'fifteen',
+    'sixteen',
+    'seventeen',
+    'eighteen',
+    'nineteen',
+  ];
+
+  static String integer(int value) {
+    if (value < 0) return 'minus ${integer(-value)}';
+    if (value < 20) return _small[value];
+    if (value < 100) {
+      final tens =
+          const [
+            '',
+            '',
+            'twenty',
+            'thirty',
+            'forty',
+            'fifty',
+            'sixty',
+            'seventy',
+            'eighty',
+            'ninety',
+          ][value ~/ 10];
+      return value % 10 == 0 ? tens : '$tens-${integer(value % 10)}';
+    }
+    if (value < 1000) {
+      final root = '${integer(value ~/ 100)} hundred';
+      return value % 100 == 0 ? root : '$root ${integer(value % 100)}';
+    }
+    if (value < 1000000) {
+      final root = '${integer(value ~/ 1000)} thousand';
+      return value % 1000 == 0 ? root : '$root ${integer(value % 1000)}';
+    }
+    final root = '${integer(value ~/ 1000000)} million';
+    return value % 1000000 == 0 ? root : '$root ${integer(value % 1000000)}';
+  }
+
+  static NarrationText normalize(
+    String source, {
+    PronunciationDictionary dictionary = PronunciationDictionary.english,
+  }) {
+    final text = StringBuffer();
+    final starts = <int>[];
+    final ends = <int>[];
+    void append(String value, int start, int end, {bool identity = false}) {
+      text.write(value);
+      for (var i = 0; i < value.length; i++) {
+        starts.add(identity ? start + i : start);
+        ends.add(identity ? start + i + 1 : end);
+      }
+    }
+
+    var cursor = 0;
+    for (final match in _tokens.allMatches(source)) {
+      append(
+        source.substring(cursor, match.start),
+        cursor,
+        match.start,
+        identity: true,
+      );
+      final token = match[0]!;
+      final dictionaryValue = dictionary.replacementFor(token);
+      String replacement;
+      final decimal = RegExp(r'^(\d+)[,.](\d+)$').firstMatch(token);
+      if (decimal != null) {
+        replacement =
+            '${integer(int.parse(decimal[1]!))} point ${decimal[2]!.split('').map((digit) => integer(int.parse(digit))).join(' ')}';
+      } else if (int.tryParse(token) case final value?) {
+        replacement = integer(value);
+      } else if (dictionaryValue != null) {
+        replacement = dictionaryValue;
+      } else if (RegExp(r'^(?:[A-Z]\.?){2,8}$').hasMatch(token)) {
+        replacement = token.replaceAll('.', '').split('').join(' ');
+      } else {
+        replacement = switch (token) {
+          '&' => ' and ',
+          '%' => ' percent ',
+          '€' => ' euros ',
+          r'$' => ' dollars ',
+          '£' => ' pounds ',
+          '@' => ' at ',
+          '+' => ' plus ',
+          '=' => ' equals ',
+          _ => token,
+        };
+      }
+      append(replacement, match.start, match.end);
+      cursor = match.end;
     }
     append(source.substring(cursor), cursor, source.length, identity: true);
     return NarrationText(text.toString(), starts, ends);

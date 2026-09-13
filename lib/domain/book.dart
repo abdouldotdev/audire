@@ -1,3 +1,5 @@
+enum DocumentFormat { epub, pdf }
+
 class BookBlock {
   const BookBlock({
     required this.text,
@@ -50,10 +52,12 @@ class ReadingBook {
     required this.author,
     required this.chapters,
     this.language = 'fr',
+    this.format = DocumentFormat.epub,
     this.coverPath,
     this.warnings = const [],
   });
   final String id, title, author, language;
+  final DocumentFormat format;
   final String? coverPath;
   final List<BookChapter> chapters;
   final List<String> warnings;
@@ -71,6 +75,7 @@ class ReadingBook {
     'title': title,
     'author': author,
     'language': language,
+    'format': format.name,
     'coverPath': coverPath,
     'warnings': warnings,
     'chapters': chapters.map((c) => c.toJson()).toList(),
@@ -80,6 +85,10 @@ class ReadingBook {
     title: j['title'] as String,
     author: j['author'] as String,
     language: j['language'] as String? ?? 'fr',
+    format: DocumentFormat.values.firstWhere(
+      (value) => value.name == j['format'],
+      orElse: () => DocumentFormat.epub,
+    ),
     coverPath: j['coverPath'] as String?,
     warnings: (j['warnings'] as List? ?? []).cast<String>(),
     chapters:
@@ -92,11 +101,24 @@ class ReadingBook {
 }
 
 class ReadingPosition {
-  const ReadingPosition({this.chapter = 0, this.segment = 0});
-  final int chapter, segment;
-  Map<String, int> toJson() => {'chapter': chapter, 'segment': segment};
+  const ReadingPosition({
+    this.chapter = 0,
+    this.segment = 0,
+    this.audioMs = 0,
+    this.audioKey,
+  });
+  final int chapter, segment, audioMs;
+  final String? audioKey;
+  Map<String, Object?> toJson() => {
+    'chapter': chapter,
+    'segment': segment,
+    'audioMs': audioMs,
+    'audioKey': audioKey,
+  };
   factory ReadingPosition.fromJson(Map<String, dynamic> j) => ReadingPosition(
     chapter: j['chapter'] as int? ?? 0,
     segment: j['segment'] as int? ?? 0,
+    audioMs: (j['audioMs'] as int? ?? 0).clamp(0, 3600000),
+    audioKey: j['audioKey'] as String?,
   );
 }

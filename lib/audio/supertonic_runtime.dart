@@ -62,7 +62,7 @@ class SupertonicRuntime {
     return SupertonicRuntime._(root, config, indexer, sessions);
   }
 
-  static String preprocess(String text) {
+  static String preprocess(String text, {String language = 'fr'}) {
     // Preserve accents through NFKD, as expected by the published frontend.
     var value = unorm.nfkd(text).replaceAll('\u00ad', '');
     const replacements = {
@@ -75,6 +75,18 @@ class SupertonicRuntime {
       '’': "'",
       '´': "'",
       '`': "'",
+      'œ': 'oe',
+      'Œ': 'OE',
+      'æ': 'ae',
+      'Æ': 'AE',
+      '…': '...',
+      '«': '"',
+      '»': '"',
+      '_': ' ',
+      '/': ' ',
+      '#': ' ',
+      '→': ' ',
+      '←': ' ',
       '[': ' ',
       ']': ' ',
       '|': ' ',
@@ -84,7 +96,10 @@ class SupertonicRuntime {
       value = value.replaceAll(e.key, e.value);
     }
     value = value.replaceAll(
-      RegExp(r'[\u{1F300}-\u{1FAFF}]', unicode: true),
+      RegExp(
+        r'[\u{1F000}-\u{1FAFF}\u2300-\u27BF\u200B-\u200F\u202A-\u202E\u2060-\u206F\uFE00-\uFE0F\uFEFF]',
+        unicode: true,
+      ),
       '',
     );
     // Text from EPUB is plain text. Never interpret book content as expression tags.
@@ -96,7 +111,8 @@ class SupertonicRuntime {
             .trim();
     if (value.isEmpty) throw const FormatException('Phrase vide.');
     if (!RegExp(r'''[.!?;:,)'"…»]$''').hasMatch(value)) value += '.';
-    return '<fr>$value</fr>';
+    final code = language == 'en' ? 'en' : 'fr';
+    return '<$code>$value</$code>';
   }
 
   Future<List<OrtValue>> _style(String voice) async {
@@ -132,12 +148,47 @@ class SupertonicRuntime {
     String text, {
     required String voice,
     int steps = 5,
+    String language = 'fr',
   }) async {
-    final input = preprocess(text);
+    // Unsupported decorative glyphs must not stop an entire book. Preserve all
+    // supported letters/accents; remove combining marks only if the vocabulary
+    // has no entry, and replace other unknown characters by a word separator.
+    final input = String.fromCharCodes(
+      preprocess(text, language: language).runes.expand((r) {
+        if (indexer.containsKey(r)) return [r];
+        if (r >= 0x300 && r <= 0x36f) return <int>[];
+        return [0x20];
+      }),
+    );
     if (input.runes.length > 650) {
-      throw const FormatException(
-        'Phrase trop longue pour la synthèse locale.',
-      );
+      // Translation and number expansion can exceed the inference limit.
+      final chunks = <Float32List>[];
+      var remaining = text;
+      while (remaining.isNotEmpty) {
+        var end = math.min(200, remaining.length);
+        if (end < remaining.length) {
+          final space = remaining.lastIndexOf(' ', end);
+          if (space > 0) end = space;
+          if (end > 0 &&
+              remaining.codeUnitAt(end - 1) >= 0xD800 &&
+              remaining.codeUnitAt(end - 1) <= 0xDBFF) {
+            end--;
+          }
+        }
+        final chunk = remaining.substring(0, end).trim();
+        remaining = remaining.substring(end).trimLeft();
+        if (chunk.isNotEmpty) {
+          chunks.add(
+            await generate(
+              chunk,
+              voice: voice,
+              steps: steps,
+              language: language,
+            ),
+          );
+        }
+      }
+      return Float32List.fromList(chunks.expand((chunk) => chunk).toList());
     }
     final style = await _style(voice);
     final owned = <OrtValue>[];
@@ -158,18 +209,7 @@ class SupertonicRuntime {
 
     try {
       final runes = input.runes.toList();
-      // Unknown symbols must not silently become unrelated characters.
-      final ids = Int64List.fromList(
-        runes.map((r) {
-          final id = indexer[r];
-          if (id == null) {
-            throw FormatException(
-              'Caractère non pris en charge par cette voix : U+${r.toRadixString(16)}. Essayez une voix système.',
-            );
-          }
-          return id;
-        }).toList(),
-      );
+      final ids = Int64List.fromList(runes.map((r) => indexer[r]!).toList());
       final textIds = await tensor(ids, [1, ids.length]);
       final textMask = await tensor(
         Float32List(ids.length)..fillRange(0, ids.length, 1),
@@ -197,7 +237,12 @@ class SupertonicRuntime {
           (ttl['latent_dim'] as int) * (ttl['chunk_compress_factor'] as int);
       final length = (duration * sampleRate / chunk).ceil();
       final shape = [1, channels, length];
-      final random = math.Random(42); // Reproducible cache for the same inputs.
+      // Vary the latent deterministically with the sentence. Reusing exactly
+      // the same noise for every phrase can reinforce the same phoneme defect.
+      final seed = input.codeUnits.fold<int>(0x811C9DC5, (value, unit) {
+        return ((value ^ unit) * 0x01000193) & 0x7FFFFFFF;
+      });
+      final random = math.Random(seed);
       final noise = Float32List(channels * length);
       for (var i = 0; i < noise.length; i++) {
         final u = math.max(1e-10, random.nextDouble());

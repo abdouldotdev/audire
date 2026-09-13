@@ -12,6 +12,7 @@ import 'data/library_store.dart';
 import 'data/model_store.dart';
 import 'ui/app.dart';
 import 'ui/design_system.dart';
+import 'translation/local_translation_engine.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -35,12 +36,30 @@ Future<void> main() async {
     }
     final models = ModelStore(library.root);
     await models.refresh();
-    final cache = Directory(
-      '${(await getTemporaryDirectory()).path}/lisiere-audio',
+    final temporary = await getTemporaryDirectory();
+    final cache = Directory('${library.root.path}/audio-cache');
+    final translationCache = Directory(
+      '${library.root.path}/translation-cache',
+    );
+    // Migrate the former temporary caches once. Future launches reuse the files
+    // in Application Support, including after process termination/app updates.
+    for (final migration in [
+      (Directory('${temporary.path}/lisiere-audio'), cache),
+      (Directory('${temporary.path}/lisiere-translation'), translationCache),
+    ]) {
+      if (!await migration.$2.exists() && await migration.$1.exists()) {
+        await migration.$1.rename(migration.$2.path);
+      }
+      await migration.$2.create(recursive: true);
+    }
+    final translator = LocalTranslationEngine(
+      modelDirectory: Directory(models.translationPath),
+      cacheDirectory: translationCache,
     );
     final reader = ReaderController(
       library: library,
       models: models,
+      translator: translator,
       native: NativeSpeechEngine(),
       neural: NeuralSpeechEngine(
         models: models,
@@ -51,9 +70,10 @@ Future<void> main() async {
     await AudioService.init<LisiereAudioHandler>(
       builder: () => LisiereAudioHandler(reader),
       config: const AudioServiceConfig(
-        androidNotificationChannelId: 'app.lisiere.playback',
-        androidNotificationChannelName: 'Lecture Lisière',
+        androidNotificationChannelId: 'lisiere_playback',
+        androidNotificationChannelName: 'Lecture Audire',
         androidStopForegroundOnPause: false,
+        androidNotificationOngoing: false,
       ),
     );
     await reader.initialize();
@@ -79,7 +99,7 @@ class StartupScreen extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 const Text(
-                  'Lisière',
+                  'Audire',
                   style: TextStyle(
                     fontFamily: LisiereTheme.serif,
                     fontSize: 44,

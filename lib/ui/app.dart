@@ -6,6 +6,7 @@ import '../core/reader_controller.dart';
 import '../domain/settings.dart';
 import 'design_system.dart';
 import 'library_page.dart';
+import 'onboarding_page.dart';
 import 'player.dart';
 import 'reader_page.dart';
 import 'settings_page.dart';
@@ -24,7 +25,7 @@ class LisiereApp extends StatelessWidget {
         PaperTheme.system => ThemeMode.system,
       };
       return AdaptiveApp(
-        title: 'Lisière',
+        title: 'Audire',
         themeMode: mode,
         materialLightTheme: LisiereTheme.material(false),
         materialDarkTheme: LisiereTheme.material(true),
@@ -55,7 +56,10 @@ class LisiereApp extends StatelessWidget {
             ),
           );
         },
-        home: HomeShell(reader: reader),
+        home:
+            reader.settings.onboardingCompleted
+                ? HomeShell(reader: reader)
+                : OnboardingPage(reader: reader),
       );
     },
   );
@@ -69,20 +73,25 @@ class HomeShell extends StatefulWidget {
 }
 
 class _HomeShellState extends State<HomeShell> {
+  final _pageStorage = PageStorageBucket();
   int _tab = 0;
+
+  void _selectTab(int index) {
+    if (index == _tab) return;
+    setState(() {
+      _tab = index;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final p = PaperColors.of(context), reader = widget.reader;
     return AdaptiveScaffold(
-      appBar: AdaptiveAppBar(title: 'Lisière', tintColor: p.accent),
       bottomNavigationBar: AdaptiveBottomNavigationBar(
         selectedIndex: _tab,
         selectedItemColor: p.accent,
         unselectedItemColor: p.muted,
-        onTap:
-            (i) => setState(() {
-              _tab = i;
-            }),
+        onTap: _selectTab,
         items: [
           AdaptiveNavigationDestination(
             icon:
@@ -95,7 +104,7 @@ class _HomeShellState extends State<HomeShell> {
           ),
           AdaptiveNavigationDestination(
             icon: Platform.isIOS ? 'slider.horizontal.3' : Icons.tune,
-            label: 'Réglages',
+            label: 'Profil',
           ),
         ],
       ),
@@ -105,13 +114,26 @@ class _HomeShellState extends State<HomeShell> {
         child: Column(
           children: [
             Expanded(
-              child: IndexedStack(
-                index: _tab,
-                children: [
-                  LibraryPage(reader: reader),
-                  VoicesPage(reader: reader),
-                  SettingsPage(reader: reader),
-                ],
+              child: PageStorage(
+                bucket: _pageStorage,
+                child: IndexedStack(
+                  index: _tab,
+                  sizing: StackFit.expand,
+                  children: [
+                    TickerMode(
+                      enabled: _tab == 0,
+                      child: LibraryPage(reader: reader),
+                    ),
+                    TickerMode(
+                      enabled: _tab == 1,
+                      child: VoicesPage(reader: reader),
+                    ),
+                    TickerMode(
+                      enabled: _tab == 2,
+                      child: SettingsPage(reader: reader),
+                    ),
+                  ],
+                ),
               ),
             ),
             PlayerStrip(

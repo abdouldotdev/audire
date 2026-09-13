@@ -1,5 +1,5 @@
 name: lisiere
-description: Lecteur EPUB local avec narration française et suivi de lecture.
+description: Lecteur EPUB et PDF local avec narration et suivi de lecture.
 publish_to: none
 version: 0.1.0+1
 environment:
@@ -24,7 +24,10 @@ dependencies:
   audio_session: ^0.2.2
   audio_service: ^0.18.18
   unorm_dart: ^0.3.0
+  phonemize: 1.0.0
   scrollable_positioned_list: ^0.3.8
+  page_flip: ^0.2.5+1
+  pdfrx: 2.4.7
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -33,3 +36,4 @@ flutter:
   uses-material-design: true
   assets:
     - assets/demo.epub
+    - assets/onboarding-landscape.png

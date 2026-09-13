@@ -1,12 +1,24 @@
-# Lisière
+# Audire
 
-**Vos livres, à votre rythme.** Lecteur EPUB en Flutter pour iOS et Android, avec synthèse vocale locale française et suivi du texte prononcé.
+**Vos livres, à votre rythme.** Lecteur EPUB et PDF en Flutter pour iOS et Android, avec synthèse vocale locale française et suivi du texte prononcé.
 
-> **État de livraison — 11 septembre 2026 : prototype source, non compilé sur Flutter dans l’environnement de préparation.** L’archive contient l’implémentation, un plugin Swift/Kotlin, un EPUB original, les scripts et les tests. Elle ne contient ni APK/IPA, ni poids de modèles, ni `pubspec.lock` résolu. Les tests Flutter, l’export ONNX et la lecture sur appareil restent à exécuter. Voir `docs/VALIDATION.md`.
+> **État de livraison — 12 septembre 2026 : prototype source, non compilé sur Flutter dans l’environnement de préparation.** L’archive contient l’implémentation, un plugin Swift/Kotlin, un EPUB original, les scripts et les tests. Elle ne contient ni APK/IPA, ni poids de modèles, ni `pubspec.lock` résolu. Les tests Flutter, l’export ONNX et la lecture sur appareil restent à exécuter. Voir `docs/VALIDATION.md`.
+
+## Open source
+
+Audire est ouvert en open source (licence MIT).
+
+- [Conditions d’utilisation](docs/legal/terms.md)
+- [Politique de confidentialité](docs/legal/privacy.md)
+- [Fiche App Store](docs/appstore_fiche.md)
+- [Contribuer](CONTRIBUTING.md)
+- [Code de conduite](CODE_OF_CONDUCT.md)
+
+Le site de documentation publique (GitHub Pages) peut être publié avec le workflow `.github/workflows/gh-pages.yml`.
 
 ## Ce qui est implémenté
 
-La bibliothèque importe les EPUB non chiffrés, affiche leurs couvertures et garde la dernière position. Le lecteur présente le texte, les chapitres, le passage courant et les commandes audio. L’onglet Voix permet de choisir une voix française installée sur le téléphone ou l’un des dix timbres Supertonic 3, d’écouter un extrait et de gérer les modèles. Les réglages couvrent les thèmes clair/sombre/système, la taille du texte, la vitesse, les titres, les notes et le défilement automatique.
+La bibliothèque importe les EPUB non chiffrés et les PDF contenant du texte sélectionnable, affiche leur vraie couverture et garde la dernière position. Pour un PDF, la première page est rendue localement comme couverture et le texte est redistribué dans le lecteur. Le lecteur présente le texte, les chapitres ou pages, le passage courant et les commandes audio. L’onglet Voix permet de choisir une voix française installée sur le téléphone ou l’un des dix timbres Supertonic 3 et de gérer les modèles. Les réglages couvrent les thèmes clair/sombre/système, la taille du texte, la vitesse, les titres, les notes et le défilement automatique.
 
 Le design system réunit un fond papier, un vert forêt, des titres éditoriaux et une typographie de lecture à empattements avec repli sur les polices système. Navigation, boutons, dialogues, cartes et contrôles utilisent réellement `adaptive_platform_ui`, fixé à **0.1.111**. Aucune police propriétaire n’est distribuée.
 
@@ -16,7 +28,7 @@ Il n’y a ni compte, ni serveur applicatif, ni clé API, ni fonction de clonage
 
 ### Prérequis
 
-Utilisez Flutter stable avec Dart **3.9 ou supérieur**, Python 3 pour les scripts et les outils Android configurés (`flutter doctor`). Le projet fixe Android **API 26 minimum**. Pour iOS : un Mac, Xcode, CocoaPods et une cible **iOS 16 minimum** ; le wrapper ONNX utilisé demande une liaison CocoaPods statique.
+Utilisez Flutter stable avec Dart **3.9 ou supérieur**, Python 3 pour les scripts et les outils Android configurés (`flutter doctor`). Le projet fixe Android **API 26 minimum**. Pour iOS : un Mac, Xcode, CocoaPods et une cible **iOS 17 minimum** ; Qwen Studio s’appuie sur MLX et le wrapper ONNX demande une liaison CocoaPods statique.
 
 Les répertoires `android/` et `ios/` ne sont pas des coquilles écrites à la main. Le bootstrap les génère à partir des modèles officiels de **votre** SDK Flutter, puis applique la configuration audio et ONNX. Il conserve `lib/`, les tests et le `pubspec.yaml` fournis. Ne lancez pas un `flutter create .` non maîtrisé sur le projet.
 
@@ -115,6 +127,14 @@ Quelques abréviations françaises et entiers simples sont développés avant la
 
 Ce n’est pas un moteur complet de rendu EPUB : styles CSS externes, mises en page fixes, images racontées, mathématiques, tableaux complexes et lecture multilingue automatique ne sont pas pris en charge. Un contenu de chapitre chiffré est refusé ; le projet ne contourne pas les DRM. N’importez que des livres que vous êtes autorisé à utiliser.
 
+## Traduction locale anglais → français
+
+Le prototype contient désormais les modes **Original / Français / Bilingue** pour les EPUB déclarés anglais. En mode Français ou Bilingue, chaque passage doit passer par un bundle local Bergamot/Marian avant le TTS français ; le résultat est mis en cache sur l’appareil. Le mode Bilingue conserve l’anglais et affiche la traduction du passage courant en dessous.
+
+**Important : le runtime natif Bergamot n’est pas encore lié dans cette livraison.** Le pipeline Flutter, l’import du bundle, le cache et l’UI sont présents, mais Android/iOS retournent volontairement `BERGAMOT_NOT_LINKED` jusqu’à l’intégration native. Voir `docs/TRANSLATION_EN_FR.md` et `AGENT_FIX_TRANSLATION.md`.
+
+Le suivi est volontairement limité à la phrase pendant une lecture traduite : les mots français ne sont pas artificiellement remappés sur les caractères anglais.
+
 ## Audio et données locales
 
 L’implémentation comprend lecture/pause, passage précédent/suivant, sélection de chapitre, double toucher sur un paragraphe, vitesse, reprise au début du dernier passage et commandes média. `audio_service` et `audio_session` relient les commandes système et les interruptions. **Le fonctionnement en arrière-plan, sous verrouillage et après interruption téléphonique reste à valider sur de vrais appareils.**
@@ -140,13 +160,15 @@ test/                 20 tests Flutter rédigés ; non exécutés ici
 tool/bootstrap.py     Génération et configuration des plateformes
 tool/export_alignment.py
                       Export du checkpoint français en pack ONNX local
-tool/test_tooling.py  7 tests Python hors ligne
+tool/package_translation_bundle.py
+                      Assemble un bundle EN→FR local vérifié
+tool/test_tooling.py  8 tests Python hors ligne
 docs/                 Architecture, design system, validation et sources
 ```
 
 ## Validation et limites de livraison
 
-Exécuté ici : les **7 tests Python** des outils et du fichier de démonstration ; compilation syntaxique Python ; analyse syntaxique seule du fichier Swift. Un contrôle lexical complémentaire des délimiteurs Dart ne remplace pas l’analyseur Dart. Non exécuté : `flutter pub get`, `flutter analyze`, les **20 tests Flutter fournis**, compilation Android/iOS, export effectif du checkpoint, chargement ONNX, rendu UI, mesures vocales et tests sur appareil. Aucun résultat non exécuté n’est présenté comme réussi.
+Exécuté ici : les **8 tests Python** des outils et du fichier de démonstration ; compilation syntaxique Python ; analyse syntaxique seule du fichier Swift. Un contrôle lexical complémentaire des délimiteurs Dart ne remplace pas l’analyseur Dart. Non exécuté : `flutter pub get`, `flutter analyze`, les **20 tests Flutter fournis**, compilation Android/iOS, export effectif du checkpoint, chargement ONNX, rendu UI, mesures vocales et tests sur appareil. Aucun résultat non exécuté n’est présenté comme réussi.
 
 Le workflow CI inclus est une **configuration à exécuter**, pas une preuve de build passé. Résolvez et conservez `pubspec.lock` après le premier `flutter pub get`, puis fixez une version Flutter dans votre environnement de livraison. Examinez aussi les limites de taille EPUB, l’usage mémoire des bibliothèques volumineuses et les erreurs de dépendances sur votre environnement.
 

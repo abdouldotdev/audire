@@ -18,15 +18,40 @@ class LisiereNativeTts {
   Future<void> speak({
     required String id,
     required String text,
+    required String language,
     String? voiceId,
     required double speed,
+    bool enqueue = false,
   }) => _methods.invokeMethod<void>('speak', {
     'id': id,
     'text': text,
+    'language': language,
     'voice': voiceId,
     'speed': speed,
+    'enqueue': enqueue,
   });
   Future<void> stop() => _methods.invokeMethod<void>('stop');
+  Future<bool> pause() async =>
+      await _methods.invokeMethod<bool>('pause') ?? false;
+  Future<bool> resume() async =>
+      await _methods.invokeMethod<bool>('resume') ?? false;
+  Future<int?> beginAudioPreparation() =>
+      _methods.invokeMethod<int>('beginAudioPreparation');
+  Future<void> endAudioPreparation(int task) =>
+      _methods.invokeMethod<void>('endAudioPreparation', {'task': task});
   Future<void> excludeFromBackup(String path) =>
       _methods.invokeMethod<void>('excludeFromBackup', {'path': path});
+  Future<String> recognizeText(
+    String imagePath, {
+    List<String> languages = const ['fr-FR', 'en-US'],
+  }) async =>
+      await _methods.invokeMethod<String>('recognizeText', {
+        'path': imagePath,
+        'languages': languages,
+      }) ??
+      '';
+  Future<Map<String, dynamic>> powerStatus() async => Map<String, dynamic>.from(
+    await _methods.invokeMapMethod<String, dynamic>('powerStatus') ??
+        const <String, dynamic>{},
+  );
 }

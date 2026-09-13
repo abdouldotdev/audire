@@ -1,10 +1,14 @@
 # Validation et état réel
 
-État au **11 septembre 2026**. Ce document sépare les contrôles réalisés des travaux restant à exécuter. Il ne constitue pas un rapport de recette réussi.
+État au **12 septembre 2026**. Ce document sépare les contrôles réalisés des travaux restant à exécuter. Il ne constitue pas un rapport de recette réussi.
 
-## Contrôles réalisés dans l’environnement de préparation
+## Contrôles réalisés dans cet environnement
 
-- **7 tests Python réussis** : structure EPUB et spine ; reproduction du contenu de la démo ; empreinte de fichier ; distance de caractères ; patch Android idempotent sur fixture ; patch iOS/liaison statique idempotent sur fixture ; résolution des imports Dart relatifs.
+- `flutter pub get` réussi.
+- `flutter analyze` réussi, sans issue.
+- `flutter test` réussi : 20 tests passés.
+- `flutter run --release -d 00008130-000E35182861401C` réussi sur **Iphone 15 Pro - Abdoul**, iOS 26.5, avec signature automatique via l'équipe `HZ3366WY57`. L'application a été installée et lancée sur l'appareil réel sans crash immédiat observé.
+- **8 tests Python réussis avec `/opt/homebrew/bin/python3.12`** : structure EPUB et spine ; reproduction du contenu de la démo ; empreinte de fichier ; distance de caractères ; patch Android idempotent sur fixture ; patch iOS/liaison statique idempotent sur fixture ; résolution des imports Dart relatifs ; empreinte du packager de traduction.
 - Compilation syntaxique des scripts Python via `py_compile`.
 - Analyse syntaxique du fichier Swift via `swiftc -frontend -parse`. Pas de SDK iOS, donc aucune vérification de types Flutter/AVFoundation, de liaison ou de signature.
 - Contrôle lexical des délimiteurs dans les fichiers Dart : utile pour repérer une parenthèse manquante, mais ce n’est pas un parseur Dart, un analyseur de types ou un compilateur Flutter.
@@ -13,7 +17,9 @@ Le journal brut de ces contrôles est dans `VALIDATION_LOG.txt`. Les tests des p
 
 ## Non exécuté
 
-`flutter pub get`, `flutter analyze`, `flutter test`, builds Android/iOS, export/quantification du checkpoint, chargement d’un modèle dans ONNX Runtime, génération réelle de voix, rendu Flutter, précision acoustique, arrière-plan, consommation mémoire, batterie et performance. Les 20 tests Flutter fournis sont des tests rédigés, pas vingt tests passés. Le SDK Flutter/Dart et les SDK mobiles n’étaient pas disponibles dans cet environnement.
+Build Android, runtime Bergamot/Marian réel, export/quantification du checkpoint, chargement d’un modèle dans ONNX Runtime, génération réelle de voix, validation audio à l’oreille, rendu Flutter inspecté manuellement, précision acoustique, arrière-plan, consommation mémoire, batterie et performance.
+
+La lecture audio sur l’iPhone doit encore être validée manuellement sur l’appareil : depuis le terminal, la build release a seulement prouvé l’installation, le lancement et l’absence de crash immédiat.
 
 Les répertoires de plateforme et le lockfile sont générés lors du bootstrap et du premier `pub get`. Le CI est fourni pour lancer une vérification réelle dans un environnement disposant de ces outils ; aucune exécution CI n’a été déclenchée ici.
 

@@ -7,6 +7,7 @@ import 'package:path_provider/path_provider.dart';
 import '../domain/book.dart';
 import '../domain/settings.dart';
 import 'epub_importer.dart';
+import 'pdf_importer.dart';
 
 class LibraryStore {
   LibraryStore._(this.root);
@@ -52,7 +53,7 @@ class LibraryStore {
         store.books.add(book);
       } catch (_) {
         store.recoveryWarning =
-            'Un livre local est illisible. Réimportez-le depuis votre EPUB.';
+            'Un livre local est illisible. Réimportez le document original.';
       }
     }
     return store;
@@ -73,10 +74,34 @@ class LibraryStore {
 
   Future<ReadingBook> importFile(String path) async {
     final f = File(path);
-    if (await f.length() > EpubImporter.maxArchiveBytes) {
-      throw const EpubImportException('EPUB trop volumineux (maximum 100 Mo).');
+    final extension = p.extension(path).toLowerCase();
+    if (extension == '.pdf') {
+      if (await f.length() > PdfImporter.maxFileBytes) {
+        throw const PdfImportException('PDF trop volumineux (maximum 100 Mo).');
+      }
+      final book = await PdfImporter().parse(
+        path,
+        coverDirectory: p.join(root.path, 'covers'),
+      );
+      final existing = books.where((candidate) => candidate.id == book.id);
+      if (existing.isNotEmpty) return existing.first;
+      final encoded = await Isolate.run(() => jsonEncode(book.toJson()));
+      await _atomic(
+        File(p.join(root.path, 'books', '${book.id}.json')),
+        encoded,
+      );
+      books.insert(0, book);
+      return book;
     }
-    return importBytes(await f.readAsBytes());
+    if (extension == '.epub') {
+      if (await f.length() > EpubImporter.maxArchiveBytes) {
+        throw const EpubImportException(
+          'EPUB trop volumineux (maximum 100 Mo).',
+        );
+      }
+      return importBytes(await f.readAsBytes());
+    }
+    throw const EpubImportException('Choisissez un document EPUB ou PDF.');
   }
 
   Future<void> remove(ReadingBook book) async {

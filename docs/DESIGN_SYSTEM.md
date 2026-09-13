@@ -1,4 +1,4 @@
-# Design system — Lisière
+# Design system — Audire
 
 ## Intention
 
