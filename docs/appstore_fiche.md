@@ -81,10 +81,10 @@ Sans écran parasite, sans abonnement imposé, avec une vraie logique de bibliot
 
 ## 6) Informations de support
 
-- Support utilisateur : [https://audire.app/support](https://audire.app/support)
-- Politique de confidentialité : [https://audire.app/privacy](https://audire.app/privacy)
-- Conditions d’utilisation : [https://audire.app/terms](https://audire.app/terms)
-- Contact : `support@audire.app`
+- Support utilisateur : [https://abdouldotdev.github.io/audire/support/](https://abdouldotdev.github.io/audire/support/)
+- Politique de confidentialité : [https://abdouldotdev.github.io/audire/legal/privacy/](https://abdouldotdev.github.io/audire/legal/privacy/)
+- Conditions d’utilisation : [https://abdouldotdev.github.io/audire/legal/terms/](https://abdouldotdev.github.io/audire/legal/terms/)
+- Contact : via la page Support
 
 ## 7) Versions / nouveautés (template)
 
