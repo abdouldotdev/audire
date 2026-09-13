@@ -49,21 +49,21 @@ read aloud,text to speech,voice reader,offline,ebook narrator,natural voice
 
 ## Allemand — pack à activer après localisation UI (`de-DE`)
 
-**Titel** : `Audire: EPUB & PDF vorlesen`  
-**Untertitel** : `Deine Bücher, dein Tempo`  
+**Titel** : `Audire: Bücher vorlesen`  
+**Untertitel** : `EPUB, PDF & Übersetzung`  
 **Keyword-Feld** :
 
 ```text
-Text vorlesen,Sprachausgabe,offline,Hörbuch,Stimme,ebook lesen
+offline,Sprachausgabe,Vorleser,natürliche Stimme,Text hören,ebook
 ```
 
 ### Longue traîne
 
 - EPUB vorlesen
 - PDF vorlesen lassen
-- Text in Sprache
 - Bücher offline hören
-- natürliche Stimme lesen
+- natürliche Stimme
+- Text hören
 
 ## Ce que montre la concurrence
 
@@ -74,6 +74,7 @@ Les fiches qui décrivent exactement l’action dès le titre et le sous-titre d
 - [Murmur — EPUB/PDF lus localement](https://apps.apple.com/us/app/murmur-epub-pdf-reader/id6787502394)
 - [OraReader — PDF/EPUB, surlignage et lecture audio](https://apps.apple.com/us/app/orareader-pdf-to-audiobook/id6770490699)
 - [Readest — EPUB/PDF, traduction et lecture à voix haute](https://apps.apple.com/ca/app/readest-ebook-reader/id6738622779)
+- [Local TTS — lecture locale EPUB/PDF et voix neuronales](https://apps.apple.com/de/app/local-tts-pdf-vorlesen-app/id6779664222)
 
 ## Règle de publication
 
