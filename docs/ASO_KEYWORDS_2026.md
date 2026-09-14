@@ -32,6 +32,17 @@ Ce classement est une recommandation éditoriale et concurrentielle. Apple ne pu
 
 La collecte repose sur le nombre de résultats de recherche App Store par pays, limité à 200. C’est utile pour comparer l’encombrement relatif, pas pour estimer le volume de recherche ou la probabilité de rang.
 
+## Validation chiffrée à faire dans Apple Ads
+
+Le lancement organique ne dépend pas d’une campagne payante. En revanche, la seule mesure Apple publique du volume relatif est la **Search Popularity**, affichée de 1 à 5 dans Apple Ads. Lorsqu’un compte Apple Ads sera relié, mesurer ces termes dans chaque storefront avant de modifier les champs publiés :
+
+1. créer un groupe **découverte** avec Search Match ;
+2. isoler les longues traînes dans un groupe **exact** ;
+3. conserver un groupe **générique** séparé pour comparer coût et conversion ;
+4. après 7 à 14 jours, garder les termes avec installation et coût soutenable, puis les intégrer aux métadonnées du prochain cycle.
+
+Apple décrit la popularité sur une échelle de 1 à 5 et recommande de séparer découverte, génériques et marque dans des groupes distincts. Voir [définitions Apple Ads](https://ads.apple.com/app-store/help/reporting/0023-reporting-options-and-definitions) et [organisation des mots-clés](https://ads.apple.com/app-store/help/keywords/0014-add-and-manage-keywords).
+
 ## Priorités observées
 
 | Priorité | Storefronts | Intention qui convertit | Concurrence observée | Angle Audire |
