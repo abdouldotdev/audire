@@ -17,6 +17,7 @@ Ce classement est une recommandation éditoriale et concurrentielle. Apple ne pu
 | FR | `voix naturelle` | non accessible | non accessible | **36** | Retenir : angle qualité |
 | FR | `lecture vocale epub` | non accessible | non accessible | **27** | Retenir dans le titre : meilleure longue traîne mesurée |
 | FR | `lire pdf à voix haute` | non accessible | non accessible | 60 | Travailler dans description/captures |
+| FR | `écouter epub` | non accessible | non accessible | **47** | Retenir dans la description et les captures |
 | FR | `lecture vocale` | non accessible | non accessible | 160 | Retenir dans le titre, pas les mots-clés |
 | FR | `synthese vocale` | non accessible | non accessible | 173 | Retenir : intention coeur |
 | FR | `lire texte` | non accessible | non accessible | 181 | Retenir : complément |
@@ -80,6 +81,7 @@ synthese vocale,lire texte,voix naturelle,traduire ebook,a voix haute
 ### Longue traîne à travailler dans la description et les captures
 
 - lecture vocale EPUB
+- écouter un EPUB
 - lire un PDF à voix haute
 - synthèse vocale hors ligne
 - transformer un livre en audio
