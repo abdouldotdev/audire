@@ -53,6 +53,12 @@ Apple décrit la popularité sur une échelle de 1 à 5 et recommande de sépare
 | 4 | Canada francophone | `lecture vocale`, `livre audio`, `hors ligne` | Moyenne ; extension naturelle de la fiche FR | Même promesse que France, vocabulaire canadien |
 | 5 | Allemagne | `Bücher vorlesen`, `EPUB vorlesen` | Forte et concurrent très proche | Attendre UI allemande ; éviter le générique `Text zu Sprache` |
 
+### Marchés volontairement différés
+
+Le Japon est bien un marché iOS à forte valeur (14,5 Md$ de biens et services numériques facilités par l’écosystème App Store en 2024, selon Apple), mais une fiche japonaise sans interface et captures japonaises ferait baisser la confiance : **ne pas ouvrir `ja-JP` avant une vraie localisation**. La même règle vaut pour la Corée et la Chine. Pour la seconde vague déjà prête, les États-Unis et le Royaume-Uni combinent marché iOS important et fiche anglaise cohérente ; Apple estime 5,4 Md$ de biens et services numériques pour le Royaume-Uni en 2024, contre 2,1 Md$ pour la France. Ces chiffres décrivent l’écosystème, pas le revenu potentiel d’Audire.
+
+Sources : [rapport Apple 2025 sur l’écosystème App Store](https://www.apple.com/newsroom/pdfs/2024-Apple-Global-Ecosystem-Report-June2025.pdf) ; [répartition iOS 2025 d’AppTweak](https://www.apptweak.com/en/reports/app-downloads-by-country). L’anglais est donc la prochaine extension rationnelle ; l’allemand suit une fois le produit localisé, et le Japon est une opportunité ultérieure de plus grande ampleur.
+
 ### Ce que nous ne ciblons pas
 
 - `livres audio` seul : intention souvent liée à un catalogue/streaming, alors qu’Audire lit les fichiers de l’utilisateur.
