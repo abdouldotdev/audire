@@ -3,6 +3,7 @@ import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'design_system.dart';
+import 'l10n.dart';
 
 /// A user-facing capability state, distinct from a retryable translation error.
 class SelectionTranslationUnavailable implements Exception {
@@ -266,7 +267,7 @@ class _TranslationBubbleState extends State<_TranslationBubble> {
     final p = PaperColors.of(context);
     return Semantics(
       container: true,
-      label: 'Traduction du passage sélectionné',
+      label: 'Traduction du passage sélectionné'.tr(context),
       child: Material(
         key: const ValueKey('selection-translation-popover'),
         color: p.surface,
@@ -302,7 +303,7 @@ class _TranslationBubbleState extends State<_TranslationBubble> {
                     ),
                   ),
                   IconAction(
-                    label: 'Fermer la traduction',
+                    label: 'Fermer la traduction'.tr(context),
                     icon: Icons.close_rounded,
                     onPressed: widget.onClose,
                   ),
@@ -331,7 +332,7 @@ class _TranslationBubbleState extends State<_TranslationBubble> {
                       future: _result,
                       builder: (context, snapshot) {
                         if (snapshot.connectionState != ConnectionState.done) {
-                          return const Padding(
+                          return Padding(
                             padding: EdgeInsets.symmetric(vertical: 10),
                             child: Row(
                               children: [
@@ -341,7 +342,11 @@ class _TranslationBubbleState extends State<_TranslationBubble> {
                                   child: CircularProgressIndicator.adaptive(),
                                 ),
                                 SizedBox(width: 12),
-                                Flexible(child: Text('Traduction en cours…')),
+                                Flexible(
+                                  child: Text(
+                                    'Traduction en cours…'.tr(context),
+                                  ),
+                                ),
                               ],
                             ),
                           );
@@ -360,7 +365,9 @@ class _TranslationBubbleState extends State<_TranslationBubble> {
                                       ? (snapshot.error!
                                               as SelectionTranslationUnavailable)
                                           .message
-                                      : 'La traduction n’a pas abouti.',
+                                      : 'La traduction n’a pas abouti.'.tr(
+                                        context,
+                                      ),
                                   style: TextStyle(
                                     color: p.muted,
                                     fontSize: 15,
@@ -371,7 +378,7 @@ class _TranslationBubbleState extends State<_TranslationBubble> {
                               if (!unavailable) ...[
                                 const SizedBox(height: 12),
                                 AdaptiveButton(
-                                  label: 'Réessayer',
+                                  label: 'Réessayer'.tr(context),
                                   onPressed:
                                       () => setState(() {
                                         _result = Future.sync(
@@ -400,7 +407,10 @@ class _TranslationBubbleState extends State<_TranslationBubble> {
                             ),
                             const SizedBox(height: 14),
                             AdaptiveButton(
-                              label: _copied ? 'Copié' : 'Copier la traduction',
+                              label: (_copied
+                                      ? 'Copié'
+                                      : 'Copier la traduction')
+                                  .tr(context),
                               onPressed: () async {
                                 await Clipboard.setData(
                                   ClipboardData(text: snapshot.data!),

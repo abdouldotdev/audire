@@ -8,6 +8,7 @@ import '../core/reader_controller.dart';
 import '../domain/settings.dart';
 import '../domain/narration.dart';
 import 'design_system.dart';
+import 'l10n.dart';
 import 'voices_page.dart';
 
 class PlayerStrip extends StatelessWidget {
@@ -51,12 +52,14 @@ class PlayerStrip extends StatelessWidget {
                 onTap: onOpen,
                 child: Semantics(
                   button: onOpen != null,
-                  label: 'Ouvrir le lecteur',
+                  label: 'Ouvrir le lecteur'.tr(context),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        reader.previewing ? 'Aperçu de la voix' : book!.title,
+                        reader.previewing
+                            ? 'Aperçu de la voix'.tr(context)
+                            : book!.title,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
@@ -67,7 +70,7 @@ class PlayerStrip extends StatelessWidget {
                       const SizedBox(height: 5),
                       Text(
                         reader.phase == SpeechPhase.preparing
-                            ? 'Préparation locale…'
+                            ? 'Préparation locale…'.tr(context)
                             : reader.previewing
                             ? reader.voiceLabel
                             : reader.chapter!.title,
@@ -82,7 +85,7 @@ class PlayerStrip extends StatelessWidget {
             ),
             const SizedBox(width: 10),
             IconAction(
-              label: reader.active ? 'Mettre en pause' : 'Lire',
+              label: (reader.active ? 'Mettre en pause' : 'Lire').tr(context),
               icon:
                   reader.active
                       ? Icons.pause_rounded
@@ -97,7 +100,7 @@ class PlayerStrip extends StatelessWidget {
             if (reader.previewing) ...[
               const SizedBox(width: 6),
               IconAction(
-                label: 'Arrêter l’aperçu',
+                label: 'Arrêter l’aperçu'.tr(context),
                 icon: Icons.close,
                 onPressed: reader.stop,
               ),
@@ -302,7 +305,7 @@ class ReaderPlayer extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   Semantics(
-                    label: 'Vitesse de lecture',
+                    label: 'Vitesse de lecture'.tr(context),
                     child: GestureDetector(
                       onTap: () {
                         final rates = [.8, 1.0, 1.2, 1.5];
@@ -329,12 +332,14 @@ class ReaderPlayer extends StatelessWidget {
                     ),
                   ),
                   IconAction(
-                    label: 'Passage précédent',
+                    label: 'Passage précédent'.tr(context),
                     icon: Icons.skip_previous_rounded,
                     onPressed: reader.previous,
                   ),
                   IconAction(
-                    label: reader.active ? 'Mettre en pause' : 'Lire',
+                    label: (reader.active ? 'Mettre en pause' : 'Lire').tr(
+                      context,
+                    ),
                     prominent: true,
                     large: true,
                     icon:
@@ -344,12 +349,12 @@ class ReaderPlayer extends StatelessWidget {
                     onPressed: () => playWithLanguageChoice(context, reader),
                   ),
                   IconAction(
-                    label: 'Passage suivant',
+                    label: 'Passage suivant'.tr(context),
                     icon: Icons.skip_next_rounded,
                     onPressed: reader.next,
                   ),
                   IconAction(
-                    label: 'Réglages audio',
+                    label: 'Réglages audio'.tr(context),
                     icon: Icons.tune_rounded,
                     onPressed:
                         () => openPage<void>(
@@ -385,7 +390,7 @@ class ReaderAudioSettingsPage extends StatelessWidget {
     return DefaultTabController(
       length: 2,
       child: AdaptiveScaffold(
-        appBar: const AdaptiveAppBar(title: 'Réglages audio'),
+        appBar: AdaptiveAppBar(title: 'Réglages audio'.tr(context)),
         body: SafeArea(
           top: true,
           bottom: false,
@@ -417,7 +422,10 @@ class ReaderAudioSettingsPage extends StatelessWidget {
                     ),
                     labelColor: p.ink,
                     unselectedLabelColor: p.muted,
-                    tabs: const [Tab(text: 'Préparer'), Tab(text: 'Audio')],
+                    tabs: [
+                      Tab(text: 'Préparer'.tr(context)),
+                      Tab(text: 'Audio'.tr(context)),
+                    ],
                   ),
                 ),
               ),

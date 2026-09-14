@@ -9,6 +9,7 @@ import '../domain/book.dart';
 import '../domain/narration.dart';
 import '../domain/settings.dart';
 import 'design_system.dart';
+import 'l10n.dart';
 import 'player.dart';
 import 'selection_translation.dart';
 import 'live_page_flip.dart';
@@ -203,9 +204,9 @@ class _ReaderPageState extends State<ReaderPage> {
         reader.chapterIndex + 1 < reader.book!.chapters.length;
     if (chapter == null) {
       return AdaptiveScaffold(
-        appBar: const AdaptiveAppBar(title: 'Lecture'),
-        body: const Center(
-          child: Text('Choisissez un livre dans la bibliothèque.'),
+        appBar: AdaptiveAppBar(title: 'Lecture'.tr(context)),
+        body: Center(
+          child: Text('Choisissez un livre dans la bibliothèque.'.tr(context)),
         ),
       );
     }
@@ -253,8 +254,8 @@ class _ReaderPageState extends State<ReaderPage> {
                 child: LayoutBuilder(
                   builder: (context, constraints) {
                     if (reader.segments.isEmpty) {
-                      return const Center(
-                        child: Text('Aucun passage à afficher.'),
+                      return Center(
+                        child: Text('Aucun passage à afficher.'.tr(context)),
                       );
                     }
                     _ensurePagination(context, constraints);
@@ -636,12 +637,14 @@ class _ReadingContentPageState extends State<_ReadingContentPage> {
                     child: ConstrainedBox(
                       constraints: const BoxConstraints(maxWidth: 680),
                       child: SelectionTranslationArea(
-                        sourceLabel: reader.settings.sourceLanguage.label,
+                        sourceLabel: reader.settings.sourceLanguage.localized(
+                          context,
+                        ),
                         targetLabel:
                             reader.settings.sourceLanguage ==
                                     ReaderLanguage.english
-                                ? 'Français'
-                                : 'Anglais',
+                                ? 'Français'.tr(context)
+                                : 'Anglais'.tr(context),
                         onSelectionActivityChanged:
                             widget.onSelectionActivityChanged,
                         translate: (text) async {
@@ -701,7 +704,7 @@ class ChapterPage extends StatelessWidget {
   final ReaderController reader;
   @override
   Widget build(BuildContext context) => AdaptiveScaffold(
-    appBar: const AdaptiveAppBar(title: 'Chapitres'),
+    appBar: AdaptiveAppBar(title: 'Chapitres'.tr(context)),
     body: SafeArea(
       top: true,
       child: ListView(
@@ -717,8 +720,8 @@ class ChapterPage extends StatelessWidget {
               title: reader.book!.chapters[i].title,
               subtitle:
                   reader.book!.format == DocumentFormat.pdf
-                      ? 'Page du document'
-                      : 'Chapitre ${i + 1}',
+                      ? 'Page du document'.tr(context)
+                      : '${'Chapitre'.tr(context)} ${i + 1}',
               selected: i == reader.chapterIndex,
               onPressed: () async {
                 final autoplay = reader.active;
@@ -741,7 +744,7 @@ class ReadingAppearancePage extends StatelessWidget {
     builder: (context, _) {
       final p = PaperColors.of(context);
       return AdaptiveScaffold(
-        appBar: const AdaptiveAppBar(title: 'Confort de lecture'),
+        appBar: AdaptiveAppBar(title: 'Confort de lecture'.tr(context)),
         body: SafeArea(
           top: true,
           child: ListView(
@@ -757,7 +760,7 @@ class ReadingAppearancePage extends StatelessWidget {
                 ),
               ),
               SectionLabel(
-                'Taille du texte',
+                'Taille du texte'.tr(context),
                 trailing: Text(
                   '${reader.settings.fontSize.round()} pt',
                   style: TextStyle(color: p.muted),
@@ -769,7 +772,7 @@ class ReadingAppearancePage extends StatelessWidget {
                 max: 32,
                 onChanged: reader.setFontSize,
               ),
-              const SectionLabel('Vitesse de la voix'),
+              SectionLabel('Vitesse de la voix'.tr(context)),
               Text(
                 '${reader.settings.speed.toStringAsFixed(2)}×',
                 textAlign: TextAlign.center,
@@ -782,9 +785,10 @@ class ReadingAppearancePage extends StatelessWidget {
               ),
               const SizedBox(height: 16),
               SettingSwitch(
-                title: 'Suivre la voix',
+                title: 'Suivre la voix'.tr(context),
                 subtitle:
-                    'Le texte avance avec la narration. Un défilement manuel reste possible.',
+                    'Le texte avance avec la narration. Un défilement manuel reste possible.'
+                        .tr(context),
                 value: reader.settings.followText,
                 onChanged: reader.setFollow,
               ),

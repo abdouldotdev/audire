@@ -6,6 +6,7 @@ import '../core/reader_controller.dart';
 import '../domain/settings.dart';
 import 'design_system.dart';
 import 'library_page.dart';
+import 'l10n.dart';
 import 'onboarding_page.dart';
 import 'player.dart';
 import 'reader_page.dart';
@@ -31,8 +32,12 @@ class LisiereApp extends StatelessWidget {
         materialDarkTheme: LisiereTheme.material(true),
         cupertinoLightTheme: LisiereTheme.cupertino(false),
         cupertinoDarkTheme: LisiereTheme.cupertino(true),
-        locale: const Locale('fr'),
-        supportedLocales: const [Locale('fr')],
+        locale: switch (reader.settings.appLanguage) {
+          AppLanguage.system => null,
+          AppLanguage.french => const Locale('fr'),
+          AppLanguage.english => const Locale('en'),
+        },
+        supportedLocales: const [Locale('fr'), Locale('en')],
         localizationsDelegates: const [
           GlobalMaterialLocalizations.delegate,
           GlobalCupertinoLocalizations.delegate,
@@ -96,15 +101,15 @@ class _HomeShellState extends State<HomeShell> {
           AdaptiveNavigationDestination(
             icon:
                 Platform.isIOS ? 'books.vertical' : Icons.auto_stories_outlined,
-            label: 'Bibliothèque',
+            label: 'Bibliothèque'.tr(context),
           ),
           AdaptiveNavigationDestination(
             icon: Platform.isIOS ? 'waveform' : Icons.graphic_eq,
-            label: 'Voix',
+            label: 'Voix'.tr(context),
           ),
           AdaptiveNavigationDestination(
             icon: Platform.isIOS ? 'slider.horizontal.3' : Icons.tune,
-            label: 'Profil',
+            label: 'Profil'.tr(context),
           ),
         ],
       ),

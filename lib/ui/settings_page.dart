@@ -6,6 +6,7 @@ import '../audio/audio_preparation.dart';
 import '../core/reader_controller.dart';
 import '../domain/settings.dart';
 import 'design_system.dart';
+import 'l10n.dart';
 import 'reader_page.dart';
 
 class SettingsPage extends StatefulWidget {
@@ -75,16 +76,23 @@ class _SettingsPageState extends State<SettingsPage>
         key: const PageStorageKey<String>('settings-tab-scroll'),
         padding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
         children: [
-          const PageIntro(kicker: 'Profil', title: 'Préférences'),
-          const SectionLabel('Lecture'),
+          PageIntro(
+            kicker: 'Profil'.tr(context),
+            title: 'Préférences'.tr(context),
+          ),
+          SectionLabel('Lecture'.tr(context)),
           AdaptiveSegmentedControl(
-            labels: const ['Claire', 'Sombre', 'Système'],
+            labels: [
+              'Claire'.tr(context),
+              'Sombre'.tr(context),
+              'Système'.tr(context),
+            ],
             selectedIndex: reader.settings.theme.index,
             onValueChanged: (i) => reader.setTheme(PaperTheme.values[i]),
           ),
           const SizedBox(height: 18),
           AdaptiveButton(
-            label: 'Typographie et vitesse',
+            label: 'Typographie et vitesse'.tr(context),
             color: p.inset,
             textColor: p.ink,
             onPressed:
@@ -93,15 +101,36 @@ class _SettingsPageState extends State<SettingsPage>
                   ReadingAppearancePage(reader: reader),
                 ),
           ),
-          const SectionLabel('Langues'),
+          SectionLabel('Langues'.tr(context)),
           SurfacePanel(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Langue source', style: TextStyle(color: p.muted)),
+                Text(
+                  'Langue de l’app'.tr(context),
+                  style: TextStyle(color: p.muted),
+                ),
                 const SizedBox(height: 10),
                 AdaptiveSegmentedControl(
-                  labels: ReaderLanguage.values.map((l) => l.label).toList(),
+                  labels:
+                      AppLanguage.values
+                          .map(AppCopy.of(context).interfaceLanguage)
+                          .toList(),
+                  selectedIndex: reader.settings.appLanguage.index,
+                  onValueChanged:
+                      (i) => reader.setAppLanguage(AppLanguage.values[i]),
+                ),
+                const SizedBox(height: 18),
+                Text(
+                  'Langue source'.tr(context),
+                  style: TextStyle(color: p.muted),
+                ),
+                const SizedBox(height: 10),
+                AdaptiveSegmentedControl(
+                  labels:
+                      ReaderLanguage.values
+                          .map((l) => l.localized(context))
+                          .toList(),
                   selectedIndex: reader.settings.sourceLanguage.index,
                   onValueChanged:
                       (i) => reader.setPlaybackLanguages(
@@ -110,10 +139,16 @@ class _SettingsPageState extends State<SettingsPage>
                       ),
                 ),
                 const SizedBox(height: 14),
-                Text('Langue de la voix', style: TextStyle(color: p.muted)),
+                Text(
+                  'Langue de la voix'.tr(context),
+                  style: TextStyle(color: p.muted),
+                ),
                 const SizedBox(height: 10),
                 AdaptiveSegmentedControl(
-                  labels: ReaderLanguage.values.map((l) => l.label).toList(),
+                  labels:
+                      ReaderLanguage.values
+                          .map((l) => l.localized(context))
+                          .toList(),
                   selectedIndex: reader.settings.targetLanguage.index,
                   onValueChanged:
                       (i) => reader.setPlaybackLanguages(
@@ -124,9 +159,10 @@ class _SettingsPageState extends State<SettingsPage>
                 if (reader.settings.sourceLanguage == ReaderLanguage.english &&
                     reader.settings.targetLanguage == ReaderLanguage.french)
                   SettingSwitch(
-                    title: 'Afficher le bilingue',
+                    title: 'Afficher le bilingue'.tr(context),
                     subtitle:
-                        'Garder le texte anglais visible et afficher la traduction française du passage actif.',
+                        'Garder le texte anglais visible et afficher la traduction française du passage actif.'
+                            .tr(context),
                     value:
                         reader.settings.translationMode ==
                         TranslationMode.bilingual,
@@ -140,7 +176,7 @@ class _SettingsPageState extends State<SettingsPage>
               ],
             ),
           ),
-          const SectionLabel('Packs locaux'),
+          SectionLabel('Packs locaux'.tr(context)),
           SurfacePanel(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,

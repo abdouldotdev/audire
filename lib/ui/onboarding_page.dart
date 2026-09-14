@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../core/reader_controller.dart';
 import '../domain/settings.dart';
 import 'design_system.dart';
+import 'l10n.dart';
 import 'onboarding_art.dart';
 
 /// Downloads are opt-in here; the reader never starts an installation.
@@ -181,24 +182,24 @@ class _OnboardingPageState extends State<OnboardingPage>
     return complete;
   }
 
-  String get _actionLabel {
-    if (_step == 0) return 'Commencer mon voyage';
+  String _actionLabel(BuildContext context) {
+    if (_step == 0) return 'Commencer mon voyage'.tr(context);
     if (_step == 1) {
-      return 'Choisir mes téléchargements';
+      return 'Choisir mes téléchargements'.tr(context);
     }
-    if (_working) return 'Préparation en cours…';
+    if (_working) return 'Préparation en cours…'.tr(context);
     if (widget.reader.models.busy || _downloadingPack != null) {
-      return 'Téléchargement en cours…';
+      return 'Téléchargement en cours…'.tr(context);
     }
     final needsDownload =
         (_useFrenchPack && !widget.reader.models.neuralInstalled) ||
         (_downloadTranslation && !widget.reader.models.translationInstalled);
     if (needsDownload) {
       return _error == null
-          ? 'Télécharger et commencer'
-          : 'Réessayer le téléchargement';
+          ? 'Télécharger et commencer'.tr(context)
+          : 'Réessayer le téléchargement'.tr(context);
     }
-    return 'Ouvrir ma bibliothèque';
+    return 'Ouvrir ma bibliothèque'.tr(context);
   }
 
   @override
@@ -228,13 +229,16 @@ class _OnboardingPageState extends State<OnboardingPage>
                               Align(
                                 alignment: Alignment.centerLeft,
                                 child: IconAction(
-                                  label: 'Retour',
+                                  label: 'Retour'.tr(context),
                                   icon: Icons.arrow_back_rounded,
                                   onPressed: busy ? null : _back,
                                 ),
                               ),
                             Semantics(
-                              label: 'Étape ${_step + 1} sur 3',
+                              label:
+                                  AppCopy.of(context).english
+                                      ? 'Step ${_step + 1} of 3'
+                                      : 'Étape ${_step + 1} sur 3',
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: List.generate(
@@ -254,6 +258,12 @@ class _OnboardingPageState extends State<OnboardingPage>
                                     ),
                                   ),
                                 ),
+                              ),
+                            ),
+                            Align(
+                              alignment: Alignment.centerRight,
+                              child: _InterfaceLanguageMenu(
+                                reader: widget.reader,
                               ),
                             ),
                           ],
@@ -314,7 +324,7 @@ class _OnboardingPageState extends State<OnboardingPage>
                                         Semantics(
                                           liveRegion: true,
                                           child: Text(
-                                            _error!,
+                                            _error!.tr(context),
                                             style: TextStyle(
                                               color: p.warning,
                                               height: 1.4,
@@ -332,7 +342,7 @@ class _OnboardingPageState extends State<OnboardingPage>
                       ),
                       const SizedBox(height: 10),
                       _ContinueButton(
-                        label: _actionLabel,
+                        label: _actionLabel(context),
                         onPressed: busy ? null : _continue,
                       ),
                     ],
@@ -354,13 +364,15 @@ class _OnboardingPageState extends State<OnboardingPage>
         OnboardingBookScene(animation: _motion),
         const SizedBox(height: 12),
         Text(
-          'Le plaisir de lire.\nLa liberté d’écouter.',
+          'Le plaisir de lire.\nLa liberté d’écouter.'.tr(context),
           textAlign: TextAlign.center,
           style: LisiereTheme.editorial(context, size: 36),
         ),
         const SizedBox(height: 14),
         Text(
-          'Vos livres vous suivent.\nMême quand vos yeux font une pause.',
+          'Vos livres vous suivent.\nMême quand vos yeux font une pause.'.tr(
+            context,
+          ),
           textAlign: TextAlign.center,
           style: TextStyle(fontSize: 15, color: p.muted, height: 1.5),
         ),
@@ -369,10 +381,16 @@ class _OnboardingPageState extends State<OnboardingPage>
           alignment: WrapAlignment.center,
           spacing: 16,
           runSpacing: 10,
-          children: const [
-            _Feature(icon: Icons.menu_book_rounded, label: 'Lire'),
-            _Feature(icon: Icons.headphones_rounded, label: 'Écouter'),
-            _Feature(icon: Icons.translate_rounded, label: 'Traduire'),
+          children: [
+            _Feature(icon: Icons.menu_book_rounded, label: 'Lire'.tr(context)),
+            _Feature(
+              icon: Icons.headphones_rounded,
+              label: 'Écouter'.tr(context),
+            ),
+            _Feature(
+              icon: Icons.translate_rounded,
+              label: 'Traduire'.tr(context),
+            ),
           ],
         ),
       ],
@@ -410,33 +428,35 @@ class _OnboardingPageState extends State<OnboardingPage>
         ),
         const SizedBox(height: 26),
         Text(
-          'Dans votre langue.',
+          'Dans votre langue.'.tr(context),
           style: LisiereTheme.editorial(context, size: 34),
         ),
         const SizedBox(height: 10),
         Text(
-          'Un livre à lire. Une voix à retrouver.',
+          'Un livre à lire. Une voix à retrouver.'.tr(context),
           style: TextStyle(fontSize: 15, color: p.muted, height: 1.5),
         ),
         const SizedBox(height: 26),
         _LanguagePicker(
-          label: 'La langue de vos livres',
+          label: 'La langue de vos livres'.tr(context),
           value: _source,
           onChanged: (value) => setState(() => _source = value),
         ),
         const SizedBox(height: 22),
         _LanguagePicker(
-          label: 'La langue de votre écoute',
+          label: 'La langue de votre écoute'.tr(context),
           value: _target,
           onChanged: (value) => setState(() => _target = value),
         ),
         const SizedBox(height: 20),
         Text(
           _source == _target
-              ? 'Vous pourrez ajuster ces choix pour chaque livre.'
+              ? 'Vous pourrez ajuster ces choix pour chaque livre.'.tr(context)
               : _source == ReaderLanguage.english
               ? 'Le pack de traduction pourra être téléchargé à l’étape suivante.'
-              : 'La lecture en anglais d’un livre français n’est pas encore disponible.',
+                  .tr(context)
+              : 'La lecture en anglais d’un livre français n’est pas encore disponible.'
+                  .tr(context),
           style: TextStyle(fontSize: 13, color: p.muted, height: 1.5),
         ),
       ],
@@ -460,12 +480,12 @@ class _OnboardingPageState extends State<OnboardingPage>
                   color: Color(0xFFF6EBD1),
                 ),
                 const SizedBox(width: 20),
-                const Expanded(
+                Expanded(
                   child: FittedBox(
                     fit: BoxFit.scaleDown,
                     alignment: Alignment.centerLeft,
                     child: Text(
-                      'Une voix.\nTout un univers.',
+                      'Une voix.\nTout un univers.'.tr(context),
                       style: TextStyle(
                         fontFamily: LisiereTheme.serif,
                         fontSize: 22,
@@ -486,20 +506,20 @@ class _OnboardingPageState extends State<OnboardingPage>
         ),
         const SizedBox(height: 20),
         Text(
-          'Trouvez votre voix.',
+          'Trouvez votre voix.'.tr(context),
           style: LisiereTheme.editorial(context, size: 32),
         ),
         const SizedBox(height: 8),
         Text(
-          'L’écoute, à votre façon.',
+          'L’écoute, à votre façon.'.tr(context),
           style: TextStyle(fontSize: 15, color: p.muted, height: 1.5),
         ),
         const SizedBox(height: 18),
         if (!french)
           _VoiceChoice(
             key: const ValueKey('system-voice'),
-            title: 'Voix anglaise du téléphone',
-            subtitle: 'Utilise la voix intégrée à votre iPhone',
+            title: 'Voix anglaise du téléphone'.tr(context),
+            subtitle: 'Utilise la voix intégrée à votre iPhone'.tr(context),
             icon: Icons.phone_iphone_rounded,
             selected: true,
             onTap: null,
@@ -507,15 +527,17 @@ class _OnboardingPageState extends State<OnboardingPage>
         if (french) ...[
           _VoiceChoice(
             key: const ValueKey('french-voices'),
-            title: 'Voix françaises',
-            subtitle: '10 voix disponibles',
+            title: 'Voix françaises'.tr(context),
+            subtitle: '10 voix disponibles'.tr(context),
             icon: Icons.graphic_eq_rounded,
             detail:
                 models.neuralInstalled
-                    ? 'Prêtes à écouter'
+                    ? 'Prêtes à écouter'.tr(context)
                     : _downloadingPack == 'voices'
                     ? models.status
-                    : 'Téléchargement inclus dans votre configuration',
+                    : 'Téléchargement inclus dans votre configuration'.tr(
+                      context,
+                    ),
             selected: true,
             installing: _downloadingPack == 'voices',
             progress: _downloadingPack == 'voices' ? models.progress : null,
@@ -527,15 +549,19 @@ class _OnboardingPageState extends State<OnboardingPage>
           const SizedBox(height: 12),
           _VoiceChoice(
             key: const ValueKey('translation-en-fr'),
-            title: 'Traduction anglais → français',
-            subtitle: 'Lire et écouter vos livres anglais en français',
+            title: 'Traduction anglais → français'.tr(context),
+            subtitle: 'Lire et écouter vos livres anglais en français'.tr(
+              context,
+            ),
             icon: Icons.translate_rounded,
             detail:
                 models.translationInstalled
-                    ? 'Déjà téléchargée'
+                    ? 'Déjà téléchargée'.tr(context)
                     : _downloadingPack == 'translation'
                     ? models.status
-                    : 'Téléchargement inclus dans votre configuration',
+                    : 'Téléchargement inclus dans votre configuration'.tr(
+                      context,
+                    ),
             selected: true,
             exclusive: false,
             installing: _downloadingPack == 'translation',
@@ -550,8 +576,8 @@ class _OnboardingPageState extends State<OnboardingPage>
             child: AdaptiveButton(
               label:
                   models.cancelled
-                      ? 'Annulation…'
-                      : 'Annuler le téléchargement',
+                      ? 'Annulation…'.tr(context)
+                      : 'Annuler le téléchargement'.tr(context),
               onPressed:
                   models.cancelled
                       ? null
@@ -591,6 +617,63 @@ class _ContinueButton extends StatelessWidget {
         minSize: const Size(48, 58),
         padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 18),
         borderRadius: BorderRadius.circular(18),
+      ),
+    );
+  }
+}
+
+class _InterfaceLanguageMenu extends StatelessWidget {
+  const _InterfaceLanguageMenu({required this.reader});
+
+  final ReaderController reader;
+
+  @override
+  Widget build(BuildContext context) {
+    final copy = AppCopy.of(context);
+    return PopupMenuButton<AppLanguage>(
+      tooltip: 'Langue de l’app'.tr(context),
+      onSelected: reader.setAppLanguage,
+      itemBuilder:
+          (context) =>
+              AppLanguage.values
+                  .map(
+                    (language) => PopupMenuItem(
+                      value: language,
+                      child: Row(
+                        children: [
+                          Icon(
+                            reader.settings.appLanguage == language
+                                ? Icons.check_rounded
+                                : Icons.language_rounded,
+                            size: 18,
+                          ),
+                          const SizedBox(width: 10),
+                          Text(copy.interfaceLanguage(language)),
+                        ],
+                      ),
+                    ),
+                  )
+                  .toList(),
+      child: Semantics(
+        button: true,
+        label: 'Langue de l’app'.tr(context),
+        child: Padding(
+          padding: const EdgeInsets.all(10),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.language_rounded, size: 18),
+              const SizedBox(width: 4),
+              Text(
+                copy.interfaceLanguage(reader.settings.appLanguage),
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -696,7 +779,7 @@ class _LanguagePicker extends StatelessWidget {
                             ],
                             Flexible(
                               child: Text(
-                                language.label,
+                                language.localized(context),
                                 overflow: TextOverflow.ellipsis,
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
@@ -801,10 +884,10 @@ class _VoiceChoice extends StatelessWidget {
                       if (installing) ...[
                         const SizedBox(height: 10),
                         Semantics(
-                          label: 'Téléchargement en cours',
+                          label: 'Téléchargement en cours'.tr(context),
                           value:
                               progress == null
-                                  ? 'Préparation'
+                                  ? 'Préparation'.tr(context)
                                   : '${(progress! * 100).round()} %',
                           child: LinearProgressIndicator(
                             value: progress == 0 ? null : progress,

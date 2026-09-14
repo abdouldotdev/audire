@@ -2,6 +2,8 @@ enum VoiceEngine { system, neural, kokoro, qwen }
 
 enum PaperTheme { light, dark, system }
 
+enum AppLanguage { system, french, english }
+
 enum TranslationMode { original, frenchAudio, bilingual }
 
 enum ReaderLanguage { french, english }
@@ -26,6 +28,7 @@ extension ReaderLanguageLabel on ReaderLanguage {
 class ReaderSettings {
   VoiceEngine engine = VoiceEngine.system;
   PaperTheme theme = PaperTheme.system;
+  AppLanguage appLanguage = AppLanguage.system;
   TranslationMode translationMode = TranslationMode.original;
   ReaderLanguage sourceLanguage = ReaderLanguage.french;
   ReaderLanguage targetLanguage = ReaderLanguage.french;
@@ -47,6 +50,7 @@ class ReaderSettings {
   Map<String, Object?> toJson() => {
     'engine': engine.name,
     'theme': theme.name,
+    'appLanguage': appLanguage.name,
     'translationMode': translationMode.name,
     'sourceLanguage': sourceLanguage.code,
     'targetLanguage': targetLanguage.code,
@@ -75,6 +79,10 @@ class ReaderSettings {
     theme = PaperTheme.values.firstWhere(
       (e) => e.name == j['theme'],
       orElse: () => PaperTheme.system,
+    );
+    appLanguage = AppLanguage.values.firstWhere(
+      (e) => e.name == j['appLanguage'],
+      orElse: () => AppLanguage.system,
     );
     translationMode = TranslationMode.values.firstWhere(
       (e) => e.name == j['translationMode'],

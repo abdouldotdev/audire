@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../core/reader_controller.dart';
 import '../domain/book.dart';
 import 'design_system.dart';
+import 'l10n.dart';
 import 'reader_page.dart';
 
 class LibraryPage extends StatefulWidget {
@@ -69,17 +70,17 @@ class _LibraryPageState extends State<LibraryPage>
   void _delete(ReadingBook book) {
     AdaptiveAlertDialog.show(
       context: context,
-      title: 'Retirer ce livre ?',
+      title: 'Retirer ce livre ?'.tr(context),
       message:
           '« ${book.title} » et sa position seront retirés d’Audire. Votre document original ne sera pas modifié.',
       actions: [
         AlertAction(
-          title: 'Annuler',
+          title: 'Annuler'.tr(context),
           style: AlertActionStyle.cancel,
           onPressed: () {},
         ),
         AlertAction(
-          title: 'Retirer',
+          title: 'Retirer'.tr(context),
           onPressed: () {
             widget.reader.removeBook(book);
           },
@@ -107,11 +108,15 @@ class _LibraryPageState extends State<LibraryPage>
         key: const PageStorageKey<String>('library-tab-scroll'),
         padding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
         children: [
-          const PageIntro(kicker: 'Bibliothèque', title: 'Vos livres'),
+          PageIntro(
+            kicker: 'Bibliothèque'.tr(context),
+            title: 'Vos livres'.tr(context),
+          ),
           const SizedBox(height: 20),
           PrimaryAction(
-            label: _importing ? 'Import du document…' : 'Importer un document',
-            subtitle: 'EPUB ou PDF',
+            label: (_importing ? 'Import du document…' : 'Importer un document')
+                .tr(context),
+            subtitle: 'EPUB ou PDF'.tr(context),
             onPressed: _importing ? null : _import,
           ),
           const SizedBox(height: 20),
@@ -127,7 +132,7 @@ class _LibraryPageState extends State<LibraryPage>
             Notice(reader.library.recoveryWarning!),
           if (reader.library.books.length > 3)
             AdaptiveTextField(
-              placeholder: 'Un titre, un auteur…',
+              placeholder: 'Un titre, un auteur…'.tr(context),
               prefixIcon: const Icon(Icons.search, size: 20),
               onChanged:
                   (v) => setState(() {
@@ -135,7 +140,7 @@ class _LibraryPageState extends State<LibraryPage>
                   }),
             ),
           SectionLabel(
-            'Livres',
+            'Livres'.tr(context),
             trailing: Text(
               '${books.length}',
               style: TextStyle(fontSize: 12, color: p.muted),
@@ -149,8 +154,8 @@ class _LibraryPageState extends State<LibraryPage>
                   const SizedBox(height: 16),
                   Text(
                     _search.isNotEmpty
-                        ? 'Aucun livre ne correspond.'
-                        : 'Aucun livre importé.',
+                        ? 'Aucun livre ne correspond.'.tr(context)
+                        : 'Aucun livre importé.'.tr(context),
                     textAlign: TextAlign.center,
                     style: LisiereTheme.editorial(context, size: 24),
                   ),
@@ -194,7 +199,7 @@ class _LibraryPageState extends State<LibraryPage>
                           ),
                           const SizedBox(height: 11),
                           Text(
-                            '${book.chapters.length} ${book.format == DocumentFormat.pdf ? 'pages' : 'chapitres'} · ${book.language.toUpperCase()}',
+                            '${book.chapters.length} ${(book.format == DocumentFormat.pdf ? 'pages' : 'chapitres').tr(context)} · ${book.language.toUpperCase()}',
                             style: TextStyle(fontSize: 11, color: p.muted),
                           ),
                           const SizedBox(height: 12),
@@ -206,8 +211,8 @@ class _LibraryPageState extends State<LibraryPage>
                                       reader.library.positions.containsKey(
                                             book.id,
                                           )
-                                          ? 'Reprendre'
-                                          : 'Ouvrir',
+                                          ? 'Reprendre'.tr(context)
+                                          : 'Ouvrir'.tr(context),
                                   color: p.inset,
                                   textColor: p.ink,
                                   onPressed: () => _open(book),

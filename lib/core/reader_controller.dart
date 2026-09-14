@@ -776,6 +776,12 @@ class ReaderController extends ChangeNotifier with WidgetsBindingObserver {
     notifyListeners();
   }
 
+  void setAppLanguage(AppLanguage value) {
+    settings.appLanguage = value;
+    _save();
+    notifyListeners();
+  }
+
   void setFollow(bool value) {
     settings.followText = value;
     _save();

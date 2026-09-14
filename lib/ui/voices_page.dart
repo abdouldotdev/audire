@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../core/reader_controller.dart';
 import '../domain/settings.dart';
 import 'design_system.dart';
+import 'l10n.dart';
 
 class VoicesPage extends StatefulWidget {
   const VoicesPage({
@@ -170,11 +171,14 @@ class _VoicesPageState extends State<VoicesPage>
             key: const PageStorageKey<String>('voices-tab-scroll'),
             padding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
             children: [
-              const PageIntro(kicker: 'Voix', title: 'Moteur'),
+              PageIntro(
+                kicker: 'Voix'.tr(context),
+                title: 'Moteur'.tr(context),
+              ),
               const SizedBox(height: 20),
               if (widget.showSourceLanguage) ...[
                 Text(
-                  'Langue du livre',
+                  'Langue du livre'.tr(context),
                   style: TextStyle(
                     color: p.muted,
                     fontSize: 12,
@@ -183,7 +187,10 @@ class _VoicesPageState extends State<VoicesPage>
                 ),
                 const SizedBox(height: 8),
                 AdaptiveSegmentedControl(
-                  labels: ReaderLanguage.values.map((l) => l.label).toList(),
+                  labels:
+                      ReaderLanguage.values
+                          .map((l) => l.localized(context))
+                          .toList(),
                   selectedIndex: reader.settings.sourceLanguage.index,
                   onValueChanged:
                       (i) => _setSourceLanguage(ReaderLanguage.values[i]),
@@ -191,7 +198,7 @@ class _VoicesPageState extends State<VoicesPage>
                 const SizedBox(height: 18),
               ],
               Text(
-                'Langue de la voix',
+                'Langue de la voix'.tr(context),
                 style: TextStyle(
                   color: p.muted,
                   fontSize: 12,
@@ -200,7 +207,10 @@ class _VoicesPageState extends State<VoicesPage>
               ),
               const SizedBox(height: 8),
               AdaptiveSegmentedControl(
-                labels: ReaderLanguage.values.map((l) => l.label).toList(),
+                labels:
+                    ReaderLanguage.values
+                        .map((l) => l.localized(context))
+                        .toList(),
                 selectedIndex: targetLanguage.index,
                 onValueChanged:
                     (i) => _setTargetLanguage(ReaderLanguage.values[i]),
@@ -208,7 +218,9 @@ class _VoicesPageState extends State<VoicesPage>
               const SizedBox(height: 20),
               _VoiceEngineCard(
                 title: 'Supertonic 3',
-                subtitle: 'Recommandé · rapide · français et anglais',
+                subtitle: 'Recommandé · rapide · français et anglais'.tr(
+                  context,
+                ),
                 score: 5,
                 size: '≈ 415 Mio',
                 selected: neural,
@@ -227,8 +239,8 @@ class _VoicesPageState extends State<VoicesPage>
                 title: 'Qwen 0.6B',
                 subtitle:
                     models.qwenPackSupported('compact')
-                        ? 'Voix premium · français et anglais'
-                        : 'Incompatible avec ce modèle détecté',
+                        ? 'Voix premium · français et anglais'.tr(context)
+                        : 'Incompatible avec ce modèle détecté'.tr(context),
                 score: 4,
                 size: '≈ 1,7 Go',
                 selected: qwen && reader.settings.qwenModel == 'compact',
@@ -267,8 +279,7 @@ class _VoicesPageState extends State<VoicesPage>
                 const SizedBox(height: 10),
                 _VoiceEngineCard(
                   title: 'Qwen Max 1.7B',
-                  subtitle:
-                      'Meilleur rendu · plus lent · français et anglais',
+                  subtitle: 'Meilleur rendu · plus lent · français et anglais',
                   score: 5,
                   size: '≈ 2,3 Go',
                   selected: qwen && reader.settings.qwenModel == 'max',
@@ -301,8 +312,8 @@ class _VoicesPageState extends State<VoicesPage>
                 title: 'Kokoro 82M',
                 subtitle:
                     targetLanguage == ReaderLanguage.english
-                        ? 'Très efficace · voix anglaises'
-                        : 'Uniquement pour la voix anglaise',
+                        ? 'Très efficace · voix anglaises'.tr(context)
+                        : 'Uniquement pour la voix anglaise'.tr(context),
                 score: 5,
                 size: '≈ 96 Mio',
                 selected: kokoro,
@@ -318,8 +329,8 @@ class _VoicesPageState extends State<VoicesPage>
               ),
               const SizedBox(height: 10),
               _VoiceEngineCard(
-                title: 'Voix du téléphone',
-                subtitle: 'Sans téléchargement · qualité variable',
+                title: 'Voix du téléphone'.tr(context),
+                subtitle: 'Sans téléchargement · qualité variable'.tr(context),
                 score: 3,
                 size: '0 Mio',
                 selected: system,
@@ -340,12 +351,16 @@ class _VoicesPageState extends State<VoicesPage>
                 ),
               if (system) ...[
                 AdaptiveButton(
-                  label: reader.loadingVoices ? 'Recherche…' : 'Recharger',
+                  label: (reader.loadingVoices ? 'Recherche…' : 'Recharger').tr(
+                    context,
+                  ),
                   onPressed: reader.loadingVoices ? null : reader.reloadVoices,
                   color: p.inset,
                   textColor: p.ink,
                 ),
-                SectionLabel('Voix locales ${targetLanguage.label}'),
+                SectionLabel(
+                  '${'Voix locales'.tr(context)} ${targetLanguage.localized(context)}',
+                ),
                 if (localVoices.isEmpty && !reader.loadingVoices)
                   Notice(
                     'Aucune voix ${targetLanguage == ReaderLanguage.english ? 'anglaise' : 'française'} hors ligne trouvée.',
