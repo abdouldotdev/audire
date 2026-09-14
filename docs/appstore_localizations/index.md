@@ -2,6 +2,8 @@
 
 Ces fiches sont calibrées pour les limites de titre, sous-titre et mots-clés d’Apple. Créez uniquement la locale dont les captures sont prêtes : une localisation App Store sans captures bloque la soumission.
 
+[Guide de préparation des captures](./SCREENSHOTS.md)
+
 - [Français — France (`fr-FR`)](./fr-FR.md) — active
 - [Anglais — États-Unis (`en-US`)](./en-US.md) — prête
 - [Anglais — Royaume-Uni (`en-GB`)](./en-GB.md) — prête
