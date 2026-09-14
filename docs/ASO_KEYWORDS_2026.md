@@ -7,7 +7,28 @@
 3. **Canada francophone, Belgique, Suisse romande** — servir la fiche `fr-FR` au lancement ; créer `fr-CA` avec captures dédiées ensuite.
 4. **Allemagne** — marché à préparer, mais ne publier la fiche `de-DE` qu’après localisation de l’interface et des captures.
 
-Ce classement est une recommandation éditoriale et concurrentielle : le connecteur de données ASO donnant popularité/difficulté par mot-clé n’est pas disponible dans cet environnement. Les champs ci-dessous évitent les doublons titre/sous-titre et tiennent sous la limite App Store de 100 caractères.
+Ce classement est une recommandation éditoriale et concurrentielle. Apple ne publie pas le volume ni la difficulté de mots-clés sans accès Apple Ads, et aucun compte AppTweak/outil ASO équivalent n’est connecté ici. Les chiffres ci-dessous sont donc des **résultats App Store publics** (un proxy de congestion : plus le nombre est faible, moins le terme est encombré), jamais une fausse popularité ou difficulté.
+
+## Benchmark vérifiable — 14 septembre 2026
+
+| Store | Mot-clé | Popularité | Difficulté | Résultats App Store (proxy) | Décision |
+|---|---|---:|---:|---:|---|
+| FR | `traduire ebook` | non accessible | non accessible | **32** | Retenir : angle différenciant |
+| FR | `voix naturelle` | non accessible | non accessible | **36** | Retenir : angle qualité |
+| FR | `lecture vocale` | non accessible | non accessible | 160 | Retenir dans le titre, pas les mots-clés |
+| FR | `synthese vocale` | non accessible | non accessible | 173 | Retenir : intention coeur |
+| FR | `lire texte` | non accessible | non accessible | 181 | Retenir : complément |
+| FR | `hors ligne` | non accessible | non accessible | 187 | Écarter : trop générique |
+| US | `PDF to audiobook` | non accessible | non accessible | **180** | Longue traîne à tester |
+| US | `read EPUB aloud` | non accessible | non accessible | 181 | Longue traîne à tester |
+| US | `text to speech` | non accessible | non accessible | 190 | Éviter en titre : très encombré |
+| US | `voice reader` | non accessible | non accessible | 190 | Garder en mot-clé |
+| GB | `PDF to audiobook` | non accessible | non accessible | **181** | Longue traîne à tester |
+| GB | `read EPUB aloud` | non accessible | non accessible | 182 | Longue traîne à tester |
+| CA | `text to speech` | non accessible | non accessible | **185** | Moins encombré que US/GB/AU |
+| AU | `read aloud` | non accessible | non accessible | **188** | Meilleur générique anglais observé |
+
+La collecte repose sur le nombre de résultats de recherche App Store par pays, limité à 200. C’est utile pour comparer l’encombrement relatif, pas pour estimer le volume de recherche ou la probabilité de rang.
 
 ## Priorités observées
 
@@ -29,10 +50,10 @@ Ce classement est une recommandation éditoriale et concurrentielle : le connect
 
 **Titre** : `Audire : lecture vocale EPUB`  
 **Sous-titre** : `PDF, livres à votre rythme`  
-**Champ mots-clés (78 caractères)** :
+**Champ mots-clés (85 caractères)** :
 
 ```text
-lecture vocale,synthese vocale,lire texte,voix naturelle,traduire ebook,hors ligne
+synthese vocale,lire texte,voix naturelle,traduire ebook,texte audio,anglais francais
 ```
 
 ### Longue traîne à travailler dans la description et les captures
