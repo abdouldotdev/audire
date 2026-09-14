@@ -15,6 +15,8 @@ Ce classement est une recommandation éditoriale et concurrentielle. Apple ne pu
 |---|---|---:|---:|---:|---|
 | FR | `traduire ebook` | non accessible | non accessible | **32** | Retenir : angle différenciant |
 | FR | `voix naturelle` | non accessible | non accessible | **36** | Retenir : angle qualité |
+| FR | `lecture vocale epub` | non accessible | non accessible | **27** | Retenir dans le titre : meilleure longue traîne mesurée |
+| FR | `lire pdf à voix haute` | non accessible | non accessible | 60 | Travailler dans description/captures |
 | FR | `lecture vocale` | non accessible | non accessible | 160 | Retenir dans le titre, pas les mots-clés |
 | FR | `synthese vocale` | non accessible | non accessible | 173 | Retenir : intention coeur |
 | FR | `lire texte` | non accessible | non accessible | 181 | Retenir : complément |
