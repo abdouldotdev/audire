@@ -2,7 +2,9 @@
 
 ## Format à livrer
 
-Envoyer les captures en PNG ou JPEG, sans cadre iPhone ajouté, en gardant la résolution native de l’appareil. Les captures doivent être de vraies vues de l’app, pas des maquettes marketing.
+Envoyer les captures en PNG ou JPEG, sans cadre iPhone ajouté, en gardant la résolution native de l’appareil. Pour l’iPhone 15 Pro, cela correspond à **1 179 × 2 556 px** en portrait. Les captures doivent être de vraies vues de l’app, pas des maquettes marketing ; pas de transparence/alpha.
+
+Apple accepte de 1 à 10 captures. Nous en retenons 6 : les trois premières portent la promesse dans les résultats de recherche ; les suivantes démontrent les bénéfices.
 
 Pour chaque locale, numéroter dans l’ordre de lecture :
 
@@ -32,3 +34,5 @@ Le même ordre est repris en anglais : `en-US`, `en-GB`, `en-CA`, `en-AU`. Une c
 - Utiliser le même ratio d’écran pour toutes les captures d’une même locale.
 - Garder les messages de la fiche visibles : les deux premières captures doivent expliquer la bibliothèque et la lecture vocale sans dépendre de la description.
 - Ajouter une locale App Store seulement après réception de son jeu complet : Apple bloque la soumission d’une locale sans captures.
+
+Référence : [spécifications de captures Apple](https://developer.apple.com/help/app-store-connect/reference/app-information/screenshot-specifications) et [construction d’une fiche produit](https://developer.apple.com/app-store/product-page/).
