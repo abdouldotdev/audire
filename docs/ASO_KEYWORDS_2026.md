@@ -23,6 +23,8 @@ Ce classement est une recommandation éditoriale et concurrentielle. Apple ne pu
 | FR | `hors ligne` | non accessible | non accessible | 187 | Écarter : trop générique |
 | US | `PDF to audiobook` | non accessible | non accessible | **180** | Longue traîne à tester |
 | US | `read EPUB aloud` | non accessible | non accessible | 181 | Longue traîne à tester |
+| US | `pdf voice reader` | non accessible | non accessible | **177** | Meilleure longue traîne anglaise testée ; retenir dans la description/captures |
+| US | `audiobook maker` | non accessible | non accessible | 179 | À tester en Apple Ads, pas dans le titre |
 | US | `text to speech` | non accessible | non accessible | 190 | Éviter en titre : très encombré |
 | US | `voice reader` | non accessible | non accessible | 190 | Garder en mot-clé |
 | GB | `PDF to audiobook` | non accessible | non accessible | **181** | Longue traîne à tester |
@@ -98,6 +100,7 @@ read aloud,text to speech,voice reader,offline,ebook narrator,natural voice
 
 - read EPUB aloud
 - PDF to audiobook
+- PDF voice reader
 - text to speech reader
 - listen to books offline
 - voice reader for PDF
