@@ -27,8 +27,8 @@ Ce classement est une recommandation éditoriale et concurrentielle : le connect
 
 ## France — publié dans App Store Connect
 
-**Titre** : `Audire : EPUB & PDF audio`  
-**Sous-titre** : `Vos livres, à votre rythme`  
+**Titre** : `Audire : lecture vocale EPUB`  
+**Sous-titre** : `PDF, livres à votre rythme`  
 **Champ mots-clés (78 caractères)** :
 
 ```text

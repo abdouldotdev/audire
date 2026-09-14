@@ -9,8 +9,8 @@
 
 ## 1) Métadonnées principales
 
-- **Nom** : Audire : EPUB & PDF audio
-- **Sous-titre** : Vos livres, à votre rythme
+- **Nom** : Audire : lecture vocale EPUB
+- **Sous-titre** : PDF, livres à votre rythme
 - **Catégorie principale** : Livres
 - **Catégorie secondaire** : Utilitaires
 - **Type de contenu** : Utilitaire / Lecture

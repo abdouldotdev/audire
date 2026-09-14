@@ -2,8 +2,8 @@
 
 **Statut : active dans App Store Connect**
 
-- Nom : `Audire : EPUB & PDF audio`
-- Sous-titre : `Vos livres, à votre rythme`
+- Nom : `Audire : lecture vocale EPUB`
+- Sous-titre : `PDF, livres à votre rythme`
 - Mots-clés : `lecture vocale,synthese vocale,lire texte,voix naturelle,traduire ebook,hors ligne`
 - Catégorie : Livres ; Utilitaires
 - URL support : `https://abdouldotdev.github.io/audire/support/`
