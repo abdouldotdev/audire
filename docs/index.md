@@ -3,7 +3,6 @@
 Bienvenue sur l’espace public de **Audire**.
 
 - [Fiche App Store / Listing](./appstore_fiche.md)
-- [Plan ASO et mots-clés](./ASO_KEYWORDS_2026.md)
 - [Déclaration App Privacy](./appstore_privacy_declaration.md)
 - [Fiches App Store localisées](./appstore_localizations/)
 - [Support](./support.md)
