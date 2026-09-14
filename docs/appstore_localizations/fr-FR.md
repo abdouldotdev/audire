@@ -4,7 +4,7 @@
 
 - Nom : `Audire : lecture vocale EPUB`
 - Sous-titre : `PDF, livres à votre rythme`
-- Mots-clés : `synthese vocale,lire texte,voix naturelle,traduire ebook,texte audio,anglais francais`
+- Mots-clés : `synthese vocale,lire texte,voix naturelle,traduire ebook,a voix haute`
 - Catégorie : Livres ; Utilitaires
 - URL support : `https://abdouldotdev.github.io/audire/support/`
 - URL confidentialité : `https://abdouldotdev.github.io/audire/legal/privacy/`

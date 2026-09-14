@@ -52,10 +52,10 @@ La collecte repose sur le nombre de résultats de recherche App Store par pays, 
 
 **Titre** : `Audire : lecture vocale EPUB`  
 **Sous-titre** : `PDF, livres à votre rythme`  
-**Champ mots-clés (85 caractères)** :
+**Champ mots-clés (69 caractères)** :
 
 ```text
-synthese vocale,lire texte,voix naturelle,traduire ebook,texte audio,anglais francais
+synthese vocale,lire texte,voix naturelle,traduire ebook,a voix haute
 ```
 
 ### Longue traîne à travailler dans la description et les captures
